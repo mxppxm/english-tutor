@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { useState, useMemo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronLeft,
   ChevronRight,
@@ -11,6 +11,7 @@ import {
   Target,
   Award,
 } from "lucide-react";
+import { highlightVocabularyInText } from "../services/vocabularyService";
 
 const ParagraphView = ({ result }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -28,6 +29,18 @@ const ParagraphView = ({ result }) => {
 
   const currentParagraph = result.paragraphs[currentIndex];
   const totalParagraphs = result.paragraphs.length;
+
+  // 处理词库高亮
+  const highlightedText = useMemo(() => {
+    if (!currentParagraph?.original || !result.vocabulary?.foundWords) {
+      return currentParagraph?.original || "";
+    }
+
+    return highlightVocabularyInText(
+      currentParagraph.original,
+      result.vocabulary.foundWords
+    );
+  }, [currentParagraph?.original, result.vocabulary?.foundWords]);
 
   const goToPrevious = () => {
     setCurrentIndex((prev) => Math.max(0, prev - 1));
@@ -130,9 +143,18 @@ const ParagraphView = ({ result }) => {
               <h3>
                 <Book size={18} />
                 原文
+                {result.vocabulary?.foundWords &&
+                  result.vocabulary.foundWords.length > 0 && (
+                    <span className="vocabulary-count-badge">
+                      {result.vocabulary.foundWords.length} 个词库单词
+                    </span>
+                  )}
               </h3>
             </div>
-            <div className="original-text">{currentParagraph.original}</div>
+            <div
+              className="original-text vocabulary-highlighted"
+              dangerouslySetInnerHTML={{ __html: highlightedText }}
+            />
           </div>
 
           {/* 翻译 */}

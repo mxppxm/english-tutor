@@ -56,7 +56,7 @@ export interface AnalysisResult {
 }
 
 // AI 提供商
-export type AIProvider = "openai" | "gemini";
+export type AIProvider = "doubao" | "gemini";
 
 // 难度级别
 export type DifficultyLevel = "入门级" | "初级" | "中级" | "高级";
@@ -64,9 +64,8 @@ export type DifficultyLevel = "入门级" | "初级" | "中级" | "高级";
 // 配置信息
 export interface ConfigSettings {
   provider: AIProvider;
-  openaiKey: string;
-  openaiModel: string;
-  openaiEndpoint: string;
+  doubaoKey: string;
+  doubaoModel: string;
   geminiKey: string;
   geminiModel: string;
 }
@@ -113,4 +112,50 @@ export interface TooltipInfo {
 export interface TooltipPosition {
   x: number;
   y: number;
+}
+
+// 历史记录相关类型
+export interface HistoryItem {
+  id?: number;
+  timestamp: number;
+  title: string;
+  originalText: string;
+  analysisResult: AnalysisResult;
+  difficulty: string;
+  preview: string;
+  wordCount: number;
+}
+
+export interface HistoryStats {
+  totalCount: number;
+  totalWords: number;
+  averageWords: number;
+  difficultyStats: Record<string, number>;
+  monthlyStats: Record<string, number>;
+}
+
+export interface HistoryPageResult {
+  records: HistoryItem[];
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
+  hasMore: boolean;
+}
+
+export interface ImportResult {
+  successCount: number;
+  errorCount: number;
+}
+
+export interface DatabaseInfo {
+  dbName: string;
+  version: number;
+  storeName: string;
+  recordCount: number;
+}
+
+// 历史记录组件Props
+export interface HistoryModalProps {
+  onClose: () => void;
+  onSelectHistory: (result: AnalysisResult) => void;
 }

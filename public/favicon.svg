@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="bookGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- 书本背景 -->
+  <rect x="6" y="8" width="18" height="20" rx="2" fill="url(#bookGradient)"/>
+  
+  <!-- 书页 -->
+  <rect x="8" y="10" width="14" height="16" rx="1" fill="white" opacity="0.9"/>
+  
+  <!-- 文字线条 -->
+  <line x1="10" y1="14" x2="20" y2="14" stroke="#667eea" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="10" y1="17" x2="18" y2="17" stroke="#667eea" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="10" y1="20" x2="19" y2="20" stroke="#667eea" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- 字母A -->
+  <text x="16" y="25" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="#764ba2" text-anchor="middle">A</text>
+  
+  <!-- 书脊装饰线 -->
+  <line x1="6" y1="12" x2="6" y2="26" stroke="#764ba2" stroke-width="2" stroke-linecap="round"/>
+</svg>

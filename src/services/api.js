@@ -1,6 +1,12 @@
 import { createOpenAI } from '@ai-sdk/openai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { generateText } from 'ai'
+import {
+  loadVocabulary,
+  findVocabularyInText,
+  getSelectedVocabulary,
+  VOCABULARY_LISTS
+} from './vocabularyService'
 
 const ANALYSIS_PROMPT = `你是一个专业的英语语法和句式分析AI助手。请专注分析给定英文文本的语法结构和复杂句式，提供深度的语法学习指导。
 
@@ -100,12 +106,12 @@ const ANALYSIS_PROMPT = `你是一个专业的英语语法和句式分析AI助�
 
 // 获取 AI 模型实例
 const getAIModel = () => {
-  const provider = localStorage.getItem('ai_provider') || 'openai'
+  const provider = localStorage.getItem('ai_provider') || 'doubao'
   const apiKey = localStorage.getItem(`${provider}_api_key`)
   const modelName = localStorage.getItem(`${provider}_model`)
 
   if (!apiKey) {
-    throw new Error(`请先配置 ${provider === 'openai' ? 'OpenAI' : 'Gemini'} API Key`)
+    throw new Error(`请先配置 ${provider === 'doubao' ? '豆包' : 'Gemini'} API Key`)
   }
 
   if (provider === 'gemini') {
@@ -114,11 +120,12 @@ const getAIModel = () => {
     })
     return google(modelName || 'gemini-2.0-flash-exp')
   } else {
-    const openai = createOpenAI({
+    // 豆包使用兼容OpenAI的API接口
+    const doubao = createOpenAI({
       apiKey: apiKey,
-      baseURL: localStorage.getItem('openai_endpoint') || undefined
+      baseURL: 'https://ark.cn-beijing.volces.com/api/v3'
     })
-    return openai(modelName || 'gpt-3.5-turbo')
+    return doubao(modelName || 'doubao-pro-32k')
   }
 }
 
@@ -183,7 +190,7 @@ function fixIncompleteJSON(jsonStr) {
 
 export const analyzeText = async (text) => {
   try {
-    const provider = localStorage.getItem('ai_provider') || 'openai'
+    const provider = localStorage.getItem('ai_provider') || 'doubao'
     console.log('Using provider:', provider)
 
     const model = getAIModel()
@@ -416,8 +423,41 @@ export const analyzeText = async (text) => {
 错误详情: ${parseError.message}`)
     }
 
+    // 集成词库匹配功能
+    let vocabularyAnalysis = null;
+    try {
+      const selectedVocabId = getSelectedVocabulary();
+      console.log('开始词库分析，选中词库:', selectedVocabId);
+
+      if (selectedVocabId && VOCABULARY_LISTS[selectedVocabId]) {
+        // 加载词库数据
+        const vocabularyData = await loadVocabulary(selectedVocabId);
+        console.log(`词库 ${selectedVocabId} 加载完成，共 ${vocabularyData.length} 个单词`);
+
+        // 在文本中查找词库单词
+        const foundWords = findVocabularyInText(text, vocabularyData);
+        console.log(`在文章中找到 ${foundWords.length} 个词库单词`);
+
+        vocabularyAnalysis = {
+          vocabularyId: selectedVocabId,
+          vocabularyName: VOCABULARY_LISTS[selectedVocabId].name,
+          totalWords: vocabularyData.length,
+          foundWords: foundWords,
+          foundCount: foundWords.length,
+          coverage: vocabularyData.length > 0 ? Math.round((foundWords.length / vocabularyData.length) * 100) : 0
+        };
+
+        console.log('词库分析完成:', vocabularyAnalysis);
+      } else {
+        console.log('未选择词库或词库不存在');
+      }
+    } catch (vocabError) {
+      console.warn('词库分析失败:', vocabError);
+      // 词库分析失败不影响主要功能，只记录警告
+    }
+
     // 确保返回的数据结构完整
-    return {
+    const analysisResult = {
       title: result.title || '英文精讲',
       overview: result.overview || '',
       difficulty: result.difficulty || '中级',
@@ -428,8 +468,13 @@ export const analyzeText = async (text) => {
         suggestions: ''
       },
       // 保留原始文本
-      originalText: text
-    }
+      originalText: text,
+      // 词库分析结果
+      vocabulary: vocabularyAnalysis
+    };
+
+    console.log('最终分析结果包含词库信息:', !!analysisResult.vocabulary);
+    return analysisResult;
   } catch (error) {
     console.error('Analysis error:', error)
 
