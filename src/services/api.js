@@ -12,7 +12,7 @@ const API_BASE_URL = import.meta.env.PROD
 
 // 通用API请求函数
 const apiRequest = async (endpoint, options = {}) => {
-  const url = endpoint;
+  const url = `${API_BASE_URL}${endpoint}`
 
   const defaultOptions = {
     method: 'POST',
@@ -151,7 +151,7 @@ export const analyzeText = async (text) => {
     console.log('开始分析文本，使用提供商:', provider)
 
     // 调用后端分析接口
-    const result = await apiRequest('https://1257983504-7k7d2p3dsi.ap-beijing.tencentscf.com', {
+    const result = await apiRequest('/analyze-text', {
       method: 'POST',
       body: JSON.stringify({
         text,
