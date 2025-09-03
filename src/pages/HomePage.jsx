@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import InputSection from "../components/InputSection";
+import ImageUpload from "../components/ImageUpload";
 import ConfigModal from "../components/ConfigModal";
 import HistoryModal from "../components/HistoryModal";
 import PageLoading from "../components/PageLoading";
@@ -11,11 +12,12 @@ import {
   saveAnalysisToHistory,
   findHistoryByText,
 } from "../services/historyService";
-import { Settings, Clock } from "lucide-react";
+import { Settings, Clock, FileText, Camera } from "lucide-react";
 import { preprocessText } from "../utils/textUtils";
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const [inputMethod, setInputMethod] = useState("text"); // 'text' or 'image'
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
@@ -262,6 +264,26 @@ const HomePage = () => {
     }
   };
 
+  // 处理图片OCR提取的文本
+  const handleImageTextExtracted = (extractedText) => {
+    console.log("📄 从图片提取到文本:", extractedText);
+
+    // 将提取的文本设置到输入框
+    setInputText(extractedText);
+
+    // 切换到文本输入模式，让用户确认文本
+    setInputMethod("text");
+
+    // 显示成功提示
+    setSuccessMessage("✅ 图片文字识别完成！请确认文本内容后开始分析。");
+
+    // 清除其他状态
+    setError(null);
+
+    // 3秒后清除成功提示
+    setTimeout(() => setSuccessMessage(null), 3000);
+  };
+
   return (
     <div className="app">
       <Header />
@@ -270,19 +292,47 @@ const HomePage = () => {
         <div className="hero-section">
           <h1 className="hero-title">你的英语学习小伙伴 ✨</h1>
           <p className="hero-subtitle">
-            贴上任何英文文本，我来陪你一起细细品读～每个句子都有惊喜发现哦！
+            贴上任何英文文本，或上传包含英文的图片，我来陪你一起细细品读～每个句子都有惊喜发现哦！
           </p>
         </div>
 
-        <InputSection
-          inputText={inputText}
-          setInputText={setInputText}
-          onAnalyze={handleAnalyze}
-          onLoadExample={handleLoadExample}
-          onClear={handleClear}
-          isLoading={isLoading} // 用于禁用控件，但不显示按钮 loading
-          showButtonLoading={false} // 新增参数：不显示按钮 loading 状态
-        />
+        {/* 输入方式切换 */}
+        <div className="input-method-selector">
+          <button
+            className={`method-btn ${inputMethod === "text" ? "active" : ""}`}
+            onClick={() => setInputMethod("text")}
+            disabled={isLoading}
+          >
+            <FileText size={20} />
+            输入文本
+          </button>
+          <button
+            className={`method-btn ${inputMethod === "image" ? "active" : ""}`}
+            onClick={() => setInputMethod("image")}
+            disabled={isLoading}
+          >
+            <Camera size={20} />
+            上传图片
+          </button>
+        </div>
+
+        {/* 根据选择的输入方式显示不同的组件 */}
+        {inputMethod === "text" ? (
+          <InputSection
+            inputText={inputText}
+            setInputText={setInputText}
+            onAnalyze={handleAnalyze}
+            onLoadExample={handleLoadExample}
+            onClear={handleClear}
+            isLoading={isLoading}
+            showButtonLoading={false}
+          />
+        ) : (
+          <ImageUpload
+            onTextExtracted={handleImageTextExtracted}
+            isDisabled={isLoading}
+          />
+        )}
 
         {error && <div className="error-message">{error}</div>}
         {successMessage && (

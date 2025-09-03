@@ -57,6 +57,17 @@ try {
     process.exit(1)
 }
 
+// 导入图片识别函数
+let imageOcrHandler
+try {
+    const imageOcrModule = await import('../netlify/functions/image-ocr.js')
+    imageOcrHandler = imageOcrModule.handler
+    console.log('✅ 成功加载图片识别函数')
+} catch (error) {
+    console.error('❌ 加载图片识别函数失败:', error)
+    process.exit(1)
+}
+
 // API 路由
 app.post('/.netlify/functions/analyze-text', async (req, res) => {
     console.log('📝 接收到分析请求...')
@@ -87,8 +98,45 @@ app.post('/.netlify/functions/analyze-text', async (req, res) => {
     }
 })
 
+// 图片识别 API 路由
+app.post('/.netlify/functions/image-ocr', async (req, res) => {
+    console.log('🖼️ 接收到图片识别请求...')
+
+    try {
+        const event = {
+            httpMethod: 'POST',
+            body: JSON.stringify(req.body),
+            headers: req.headers
+        }
+
+        const result = await imageOcrHandler(event)
+
+        res.status(result.statusCode || 200)
+
+        // 设置响应头
+        if (result.headers) {
+            Object.entries(result.headers).forEach(([key, value]) => {
+                res.setHeader(key, value)
+            })
+        }
+
+        res.send(result.body)
+
+    } catch (error) {
+        console.error('❌ 图片识别函数执行错误:', error)
+        res.status(500).json({ error: '图片识别服务器内部错误' })
+    }
+})
+
 // 处理 OPTIONS 请求
 app.options('/.netlify/functions/analyze-text', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+    res.status(200).send('')
+})
+
+app.options('/.netlify/functions/image-ocr', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
@@ -119,12 +167,14 @@ app.listen(PORT, () => {
     console.log(`
 🌟 自定义开发服务器已启动！
 
-  ➜  Local:   http://localhost:${PORT}
-  ➜  API:     http://localhost:${PORT}/.netlify/functions/analyze-text
+  ➜  Local:       http://localhost:${PORT}
+  ➜  分析API:     http://localhost:${PORT}/.netlify/functions/analyze-text
+  ➜  图片识别:     http://localhost:${PORT}/.netlify/functions/image-ocr
   
 ✨ 特性：
   • ✅ 无 30 秒函数超时限制
   • 🚀 支持长时间 AI 分析
+  • 🖼️ 支持图片文字识别
   • 🔧 完整的 CORS 支持
   
 按 Ctrl+C 停止服务器

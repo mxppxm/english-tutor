@@ -194,6 +194,40 @@ export const analyzeText = async (text) => {
   }
 }
 
+// 图片OCR识别函数 - 调用新的独立OCR API
+export const recognizeImageText = async (imageData) => {
+  try {
+    // 获取用户配置
+    const provider = localStorage.getItem('ai_provider') || 'doubao'
+    const apiKey = localStorage.getItem(`${provider}_api_key`)
+    const modelName = localStorage.getItem(`${provider}_model`)
+
+    if (!apiKey) {
+      throw new Error(`请先配置 ${provider === 'doubao' ? '豆包' : 'Gemini'} API Key`)
+    }
+
+    console.log('🖼️ 开始图片文字识别，使用提供商:', provider)
+
+    // 调用独立的OCR API
+    const result = await apiRequest('/image-ocr', {
+      method: 'POST',
+      body: JSON.stringify({
+        image: imageData,
+        provider,
+        apiKey,
+        modelName
+      })
+    })
+
+    console.log('✅ 图片识别完成')
+    return result
+
+  } catch (error) {
+    console.error('🚨 图片识别失败:', error)
+    throw error
+  }
+}
+
 // 用于测试的模拟数据
 export const getMockAnalysis = (text) => {
   return {

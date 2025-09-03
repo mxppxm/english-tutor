@@ -16,6 +16,9 @@
 [functions."analyze-text"]
   timeout = 300  # 5分钟超时
 
+[functions."image-ocr"]
+  timeout = 120  # 2分钟超时（图片识别）
+
 [[redirects]]
   # SPA 路由支持
   from = "/*"
