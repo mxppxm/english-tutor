@@ -43,6 +43,23 @@ const apiRequest = async (endpoint, options = {}) => {
   }
 }
 
+// 批量句子分析（每批最多5句，分批请求，自动合并结果）
+export const analyzeSentencesBatch = async (sentences, batchSize = 5) => {
+  const allResults = [];
+  for (let i = 0; i < sentences.length; i += batchSize) {
+    const batch = sentences.slice(i, i + batchSize);
+    const batchResult = await analyzeSentences(batch);
+    if (batchResult?.sentences && Array.isArray(batchResult.sentences)) {
+      allResults.push(...batchResult.sentences);
+    } else {
+      // 兼容老的 analyzeSentences 返回格式
+      allResults.push(batchResult);
+    }
+  }
+  // 合并后按原有格式返回，方便前端使用
+  return { sentences: allResults };
+}
+
 // 逐句分析函数 - 新的句子级分析接口
 export const analyzeSentences = async (sentences) => {
   try {
@@ -242,7 +259,7 @@ export const getMockAnalysis = (text) => {
       },
       {
         word: "forever",
-        phonetic: "/fərˈevər/",
+        phonetic: "/fəˈevər/",
         meaning: "永远，永久",
         example: "Nothing lasts forever."
       },
@@ -307,6 +324,6 @@ export const getMockAnalysis = (text) => {
         keyPoints: "- **once**: 表示一次性的动作\n- **forever**: 表示永久持续的状态"
       }
     ],
-    suggestions: "## 学习建议\n\n1. **重点掌握比较级结构**：文中使用了 'was better than' 这样的比较结构，这是英语中非常常见的表达方式。\n\n2. **注意时态运用**：文章对比了过去和现在的情况，注意 'was' (过去时) 的使用。\n\n3. **积累常用词汇**：'manually', 'forever' 等都是日常交流中的高频词汇。\n\n4. **练习建议**：\n   - 尝试用比较级结构造句\n   - 练习描述过去与现在的对比"
+    suggestions: "## 学习建议\n\n1. **重点掌握比较级结构**：文中使用了 'was better than' 这样的比较结构，这是英语中非常常见的表达方式。\n\n2. **注意时间状语的运用**：如 'in the past' 可以灵活用于句首或句中。\n\n3. **动词短语的理解**：如 'work for you' 表示有益于某人。\n"
   }
 }
