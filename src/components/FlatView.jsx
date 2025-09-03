@@ -24,30 +24,12 @@ const FlatView = ({ result }) => {
     }));
   };
 
-  const getDifficultyColor = (difficulty) => {
-    const colors = {
-      入门级: "difficulty-beginner",
-      初级: "difficulty-elementary",
-      中级: "difficulty-intermediate",
-      高级: "difficulty-advanced",
-    };
-    return colors[difficulty] || "difficulty-intermediate";
-  };
-
   return (
     <div className="flat-view">
       {/* 头部信息 */}
       <div className="flat-header">
         <h2 className="flat-title">{result.title || "英文精讲"}</h2>
         <div className="flat-meta">
-          <span
-            className={`difficulty-badge ${getDifficultyColor(
-              result.difficulty
-            )}`}
-          >
-            <Award size={14} />
-            {result.difficulty}
-          </span>
           {result.overview && (
             <span className="overview">{result.overview}</span>
           )}

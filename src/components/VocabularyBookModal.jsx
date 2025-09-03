@@ -165,7 +165,7 @@ const VocabularyBookModal = ({ onClose }) => {
               <Heart className="vocabulary-empty-icon" />
               <p>单词本是空的</p>
               <p className="text-sm text-gray-500">
-                在学习过程中点击单词旁的收藏按钮来添加单词
+                在学习过程中点击单词旁的"加入单词本"按钮来添加单词
               </p>
             </div>
           ) : (

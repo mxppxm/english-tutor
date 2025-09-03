@@ -23,145 +23,42 @@ import {
 } from "../services/wordCollectionService";
 import SimpleHighlightedText from "./SimpleHighlightedText";
 import VocabularyLearning from "./VocabularyLearning";
+import WordTooltip from "./WordTooltip";
 
-const WordTooltip = ({
-  word,
-  position,
-  onClose,
-  onCollect,
-  onMaster,
-  onSpeak,
-  isCollected,
-  isMastered,
-}) => {
-  if (!word || !position) return null;
+// 高亮文本中英文部分的辅助函数
+const highlightEnglishInText = (text) => {
+  if (!text) return text;
 
-  const handleCollect = async () => {
-    await onCollect(word, !isCollected);
-  };
+  // 匹配英文单词、短语和句子的正则表达式
+  const englishRegex =
+    /([a-zA-Z][a-zA-Z0-9\s.,;:!?'"()\-\/]*[a-zA-Z0-9.,;:!?'"()\-\/]|[a-zA-Z]+)/g;
 
-  const handleMaster = async () => {
-    await onMaster(word, !isMastered);
-  };
+  const parts = [];
+  let lastIndex = 0;
+  let match;
 
-  return (
-    <div
-      className="word-tooltip"
-      style={{
-        position: "absolute",
-        left: position.x,
-        top: position.y,
-        zIndex: 200,
-        transform: "translateX(-50%)",
-      }}
-    >
-      <div className="tooltip-content">
-        <div className="tooltip-header">
-          <div className="tooltip-word-section">
-            <span className="tooltip-word">{word.word}</span>
-            {word.raw && word.raw.phonetic ? (
-              <span className="tooltip-phonetic">[{word.raw.phonetic}]</span>
-            ) : (
-              word.phonetic && (
-                <span className="tooltip-phonetic">[{word.phonetic}]</span>
-              )
-            )}
-          </div>
-          <button
-            className="tooltip-speak-btn"
-            onClick={() => onSpeak(word.word)}
-            title="发音"
-          >
-            <Volume2 size={16} />
-          </button>
-        </div>
+  while ((match = englishRegex.exec(text)) !== null) {
+    // 添加匹配前的中文部分
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
 
-        {/* 显示词性和释义 - 统一格式 */}
-        <div className="tooltip-meanings">
-          {word.raw &&
-          word.raw.translations &&
-          word.raw.translations.length > 0 ? (
-            word.raw.translations.map((trans, index) => (
-              <div key={index} className="tooltip-meaning-line">
-                {trans.type && (
-                  <span className="meaning-type-inline">{trans.type}.</span>
-                )}
-                <span className="meaning-text">{trans.translation}</span>
-              </div>
-            ))
-          ) : word.translations && word.translations.length > 0 ? (
-            word.translations.map((trans, index) => (
-              <div key={index} className="tooltip-meaning-line">
-                {trans.type && (
-                  <span className="meaning-type-inline">{trans.type}.</span>
-                )}
-                <span className="meaning-text">{trans.translation}</span>
-              </div>
-            ))
-          ) : word.allTranslations ? (
-            <div className="tooltip-meaning-line">
-              <span className="meaning-text">{word.allTranslations}</span>
-            </div>
-          ) : word.translation ? (
-            <div className="tooltip-meaning-line">
-              <span className="meaning-text">{word.translation}</span>
-            </div>
-          ) : (
-            word.meaning && (
-              <div className="tooltip-meaning-line">
-                <span className="meaning-text">{word.meaning}</span>
-              </div>
-            )
-          )}
-        </div>
+    // 添加高亮的英文部分
+    parts.push(
+      <span key={match.index} className="english-highlight">
+        {match[0]}
+      </span>
+    );
 
-        {/* 显示所有短语 */}
-        {((word.raw && word.raw.phrases && word.raw.phrases.length > 0) ||
-          (word.phrases && word.phrases.length > 0)) && (
-          <div className="tooltip-phrases">
-            <div className="phrases-label">常用短语：</div>
-            {(word.raw && word.raw.phrases ? word.raw.phrases : word.phrases)
-              .slice(0, 3)
-              .map((phrase, index) => (
-                <div key={index} className="tooltip-phrase">
-                  <span className="phrase-text">{phrase.phrase}</span>
-                  <span className="phrase-translation">
-                    {phrase.translation}
-                  </span>
-                </div>
-              ))}
-          </div>
-        )}
+    lastIndex = match.index + match[0].length;
+  }
 
-        {/* 原有的用法示例 */}
-        {word.usage && (
-          <div className="tooltip-usage">
-            <span className="usage-label">例句：</span>
-            {word.usage}
-          </div>
-        )}
+  // 添加剩余的中文部分
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
 
-        <div className="tooltip-actions">
-          <button
-            onClick={handleMaster}
-            className={`master-button ${isMastered ? "mastered" : ""}`}
-            title={isMastered ? "取消掌握" : "掌握后不再高亮"}
-          >
-            <Star size={16} />
-            {isMastered ? "已掌握" : "掌握"}
-          </button>
-          <button
-            onClick={handleCollect}
-            className={`collect-button ${isCollected ? "collected" : ""}`}
-            title={isCollected ? "取消收藏" : "收藏单词"}
-          >
-            {isCollected ? <HeartOff size={16} /> : <Heart size={16} />}
-            {isCollected ? "取消收藏" : "收藏"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+  return parts;
 };
 
 const FlatLearningView = ({ result }) => {
@@ -249,7 +146,6 @@ const FlatLearningView = ({ result }) => {
         ...wordData,
         context: wordData.context || "",
         sourceTitle: result.title || "未命名文章",
-        difficulty: result.difficulty || "中级",
       });
       setCollectedWords((prev) => new Set(prev).add(wordData.word));
     } else {
@@ -287,25 +183,12 @@ const FlatLearningView = ({ result }) => {
     if ("speechSynthesis" in window) {
       const utterance = new SpeechSynthesisUtterance(word);
       utterance.lang = "en-US";
-      utterance.rate = 0.8;
+      utterance.rate = 0.7; // 单词发音稍快一点，但也更清晰
+      utterance.pitch = 1.0; // 标准音调
+      utterance.volume = 1.0; // 最大音量，确保清晰
       speechSynthesis.speak(utterance);
     }
   };
-
-  // 初始化展开状态 - 默认展开所有模块
-  useEffect(() => {
-    if (result?.paragraphs) {
-      const initialExpandedState = {};
-      result.paragraphs.forEach((_, index) => {
-        initialExpandedState[`translation-${index}`] = true;
-        initialExpandedState[`vocabulary-${index}`] = true;
-        initialExpandedState[`grammar-${index}`] = true;
-        initialExpandedState[`sentences-${index}`] = true;
-        initialExpandedState[`keyPoints-${index}`] = true;
-      });
-      setExpandedSections(initialExpandedState);
-    }
-  }, [result]);
 
   // 点击外部区域关闭tooltip
   useEffect(() => {
@@ -331,7 +214,7 @@ const FlatLearningView = ({ result }) => {
       {/* 完整原文展示 */}
       <div className="full-text-section">
         <div className="full-text-header">
-          <h2>完整原文</h2>
+          <h2>原文</h2>
         </div>
         <div className="full-text-content">
           <SimpleHighlightedText
@@ -353,7 +236,7 @@ const FlatLearningView = ({ result }) => {
       {/* 完整翻译展示 */}
       <div className="full-translation-section">
         <div className="full-translation-header">
-          <h2>完整翻译</h2>
+          <h2>翻译</h2>
         </div>
         <div className="full-translation-content">
           {result.paragraphs.map((p) => p.translation).join("\n\n")}
@@ -400,7 +283,7 @@ const FlatLearningView = ({ result }) => {
               title="重点单词学习"
             >
               <Book size={18} />
-              重点单词
+              重点单词学习
             </button>
           )}
         </div>
@@ -501,8 +384,8 @@ const FlatLearningView = ({ result }) => {
                                 }`}
                                 title={
                                   collectedWords.has(word.word)
-                                    ? "取消收藏"
-                                    : "收藏单词"
+                                    ? "从单词本移除"
+                                    : "加入单词本"
                                 }
                               >
                                 {collectedWords.has(word.word) ? (
@@ -545,7 +428,9 @@ const FlatLearningView = ({ result }) => {
                     <div className="grammar-list">
                       {paragraph.grammar.map((item, grammarIndex) => (
                         <div key={grammarIndex} className="grammar-item">
-                          <div className="grammar-point">{item.point}</div>
+                          <div className="grammar-point">
+                            {highlightEnglishInText(item.point)}
+                          </div>
                           {item.sentence && (
                             <div className="grammar-sentence">
                               <span className="sentence-label">原文：</span>
@@ -555,12 +440,12 @@ const FlatLearningView = ({ result }) => {
                             </div>
                           )}
                           <div className="grammar-explanation">
-                            {item.explanation}
+                            {highlightEnglishInText(item.explanation)}
                           </div>
                           {item.example && (
                             <div className="grammar-example">
                               <span className="example-label">例句：</span>
-                              {item.example}
+                              {highlightEnglishInText(item.example)}
                             </div>
                           )}
                         </div>
@@ -659,37 +544,56 @@ const FlatLearningView = ({ result }) => {
 
       {/* 重点单词学习弹窗 */}
       {showVocabularyLearning && result.vocabulary?.foundWords && (
-        <div className="modal-overlay">
-          <div className="modal-container vocabulary-learning-modal">
-            <div className="modal-header fixed-header">
-              <h2>
-                重点单词学习
-                {result.vocabulary.vocabularyName && (
-                  <span className="vocabulary-name-badge">
-                    {result.vocabulary.vocabularyName}
-                  </span>
-                )}
-                <span className="word-count-badge">
-                  {result.vocabulary.foundWords.length} 个单词
-                </span>
-              </h2>
-              <button
-                onClick={() => setShowVocabularyLearning(false)}
-                className="close-button"
-                title="关闭"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="modal-content">
-              <VocabularyLearning
-                vocabularyWords={result.vocabulary.foundWords}
-                vocabularyListName={result.vocabulary.vocabularyName}
-              />
-            </div>
-          </div>
-        </div>
+        <VocabularyLearningModal
+          vocabularyWords={result.vocabulary.foundWords}
+          vocabularyName={result.vocabulary.vocabularyName}
+          onClose={() => setShowVocabularyLearning(false)}
+        />
       )}
+    </div>
+  );
+};
+
+// 重点单词学习弹窗组件
+const VocabularyLearningModal = ({
+  vocabularyWords,
+  vocabularyName,
+  onClose,
+}) => {
+  useEffect(() => {
+    // 防止滚动穿透 - 禁用body滚动
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      // 组件卸载时恢复body滚动
+      document.body.style.overflow = "unset";
+    };
+  }, []);
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-container vocabulary-learning-modal">
+        <div className="modal-header fixed-header">
+          <h2>
+            重点单词学习
+            {vocabularyName && (
+              <span className="vocabulary-name-badge">{vocabularyName}</span>
+            )}
+            <span className="word-count-badge">
+              {vocabularyWords.length} 个单词
+            </span>
+          </h2>
+          <button onClick={onClose} className="close-button" title="关闭">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="modal-content">
+          <VocabularyLearning
+            vocabularyWords={vocabularyWords}
+            vocabularyListName={vocabularyName}
+          />
+        </div>
+      </div>
     </div>
   );
 };

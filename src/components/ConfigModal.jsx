@@ -3,31 +3,40 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, Save, Key, Sparkles, Brain, BookOpen } from "lucide-react";
 import VocabularySelector from "./VocabularySelector";
 
-const ConfigModal = ({ onClose }) => {
+const ConfigModal = ({ isForced = false, onClose }) => {
   const [activeTab, setActiveTab] = useState("api");
   const [provider, setProvider] = useState("doubao");
   const [doubaoKey, setDoubaoKey] = useState("");
-  const [doubaoModel, setDoubaoModel] = useState("doubao-pro-32k");
+  const [doubaoModel, setDoubaoModel] = useState("deepseek-v3-1-250821");
   const [geminiKey, setGeminiKey] = useState("");
   const [geminiModel, setGeminiModel] = useState("gemini-2.0-flash-exp");
   const [showApiKey, setShowApiKey] = useState(false);
+  const [filterCommonWords, setFilterCommonWords] = useState(true);
 
   useEffect(() => {
     // 从本地存储加载配置
     const savedProvider = localStorage.getItem("ai_provider") || "doubao";
     const savedDoubaoKey = localStorage.getItem("doubao_api_key") || "";
     const savedDoubaoModel =
-      localStorage.getItem("doubao_model") || "doubao-pro-32k";
+      localStorage.getItem("doubao_model") || "deepseek-v3-1-250821";
     const savedGeminiKey = localStorage.getItem("gemini_api_key") || "";
     const savedGeminiModel =
       localStorage.getItem("gemini_model") || "gemini-2.0-flash-exp";
+    const savedFilterCommonWords =
+      localStorage.getItem("filter_common_words") !== "false"; // 默认为true
 
     setProvider(savedProvider);
     setDoubaoKey(savedDoubaoKey);
     setDoubaoModel(savedDoubaoModel);
     setGeminiKey(savedGeminiKey);
     setGeminiModel(savedGeminiModel);
-  }, []);
+    setFilterCommonWords(savedFilterCommonWords);
+
+    // 如果是强制模式，确保显示 API 配置标签页
+    if (isForced) {
+      setActiveTab("api");
+    }
+  }, [isForced]);
 
   const handleSave = () => {
     // 验证当前选择的提供商是否有API密钥
@@ -43,6 +52,7 @@ const ConfigModal = ({ onClose }) => {
     localStorage.setItem("doubao_model", doubaoModel);
     localStorage.setItem("gemini_api_key", geminiKey);
     localStorage.setItem("gemini_model", geminiModel);
+    localStorage.setItem("filter_common_words", filterCommonWords.toString());
 
     onClose();
   };
@@ -54,7 +64,7 @@ const ConfigModal = ({ onClose }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
+        onClick={isForced ? undefined : onClose}
       >
         <motion.div
           className="modal-container"
@@ -67,10 +77,15 @@ const ConfigModal = ({ onClose }) => {
             <h2>
               {activeTab === "api" ? <Key size={24} /> : <BookOpen size={24} />}
               {activeTab === "api" ? "API 配置" : "词库配置"}
+              {isForced && activeTab === "api" && (
+                <span className="required-badge">必须配置</span>
+              )}
             </h2>
-            <button className="close-button" onClick={onClose}>
-              <X size={20} />
-            </button>
+            {!isForced && (
+              <button className="close-button" onClick={onClose}>
+                <X size={20} />
+              </button>
+            )}
           </div>
 
           {/* 标签页导航 */}
@@ -86,7 +101,12 @@ const ConfigModal = ({ onClose }) => {
               className={`modal-tab ${
                 activeTab === "vocabulary" ? "active" : ""
               }`}
-              onClick={() => setActiveTab("vocabulary")}
+              onClick={() => !isForced && setActiveTab("vocabulary")}
+              disabled={isForced}
+              style={{
+                opacity: isForced ? 0.5 : 1,
+                cursor: isForced ? "not-allowed" : "pointer",
+              }}
             >
               <BookOpen size={18} />
               词库设置
@@ -97,6 +117,20 @@ const ConfigModal = ({ onClose }) => {
             {/* API 配置页面 */}
             {activeTab === "api" && (
               <>
+                {isForced && (
+                  <div className="forced-config-notice">
+                    <div className="notice-content">
+                      <Key size={20} />
+                      <div>
+                        <h4>需要配置 API 密钥</h4>
+                        <p>
+                          使用英语精讲功能需要配置 AI 提供商的 API
+                          密钥。请选择一个提供商并输入有效的 API 密钥。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {/* AI 提供商选择 */}
                 <div className="form-group">
                   <label>选择 AI 提供商</label>
@@ -163,6 +197,9 @@ const ConfigModal = ({ onClose }) => {
                         onChange={(e) => setDoubaoModel(e.target.value)}
                         className="form-select"
                       >
+                        <option value="deepseek-v3-1-250821">
+                          DeepSeek V3.1 (最新版本、高性能)
+                        </option>
                         <option value="doubao-pro-32k">
                           豆包-Pro-32K (专业版、长上下文)
                         </option>
@@ -271,17 +308,40 @@ const ConfigModal = ({ onClose }) => {
                     首次选择词库时需要从网络加载数据，请耐心等待。
                   </div>
                 </div>
+
+                {/* 过滤设置 */}
+                <div className="vocabulary-filter-settings">
+                  <h4>📝 过滤设置</h4>
+                  <div className="filter-option">
+                    <label className="switch-label">
+                      <input
+                        type="checkbox"
+                        checked={filterCommonWords}
+                        onChange={(e) => setFilterCommonWords(e.target.checked)}
+                        className="switch-input"
+                      />
+                      <span className="switch-slider"></span>
+                      过滤常见简单单词
+                    </label>
+                    <p className="filter-description">
+                      启用后，将过滤掉如 "the", "and", "my", "is"
+                      等常见简单单词， 避免它们被标记为重点单词。推荐保持开启。
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </div>
 
           <div className="modal-footer">
-            <button className="btn btn-secondary" onClick={onClose}>
-              取消
-            </button>
+            {!isForced && (
+              <button className="btn btn-secondary" onClick={onClose}>
+                取消
+              </button>
+            )}
             <button className="btn btn-primary" onClick={handleSave}>
               <Save size={16} />
-              保存配置
+              {isForced ? "保存并继续" : "保存配置"}
             </button>
           </div>
         </motion.div>

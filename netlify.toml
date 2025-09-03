@@ -1,0 +1,54 @@
+[build]
+  # 构建设置
+  publish = "dist"
+  command = "npm run build"
+
+[build.environment]
+  # Node.js 版本
+  NODE_VERSION = "18"
+
+[functions]
+  # 云函数设置
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# 特定函数配置
+[functions."analyze-text"]
+  timeout = 300  # 5分钟超时
+
+[[redirects]]
+  # SPA 路由支持
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  # 为静态资源设置缓存头
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  # 为 API 设置 CORS 头
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+
+# 开发设置
+[dev]
+  command = "npm run dev"
+  port = 3000
+  publish = "dist"
+  autoLaunch = true
+  functions = "netlify/functions"
+  targetPort = 5173
+  
+# 环境变量
+[dev.env]
+  NETLIFY_LAMBDA_TIMEOUT = "300"
+
+# 环境变量（在 Netlify 控制台中设置）
+# DOUBAO_API_KEY = "your-doubao-api-key"
+# GEMINI_API_KEY = "your-gemini-api-key"

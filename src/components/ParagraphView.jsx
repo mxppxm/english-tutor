@@ -57,16 +57,6 @@ const ParagraphView = ({ result }) => {
     }));
   };
 
-  const getDifficultyColor = (difficulty) => {
-    const colors = {
-      入门级: "difficulty-beginner",
-      初级: "difficulty-elementary",
-      中级: "difficulty-intermediate",
-      高级: "difficulty-advanced",
-    };
-    return colors[difficulty] || "difficulty-intermediate";
-  };
-
   return (
     <div className="paragraph-view">
       {/* 头部信息 */}
@@ -74,14 +64,6 @@ const ParagraphView = ({ result }) => {
         <div className="header-info">
           <h2 className="view-title">{result.title}</h2>
           <div className="header-meta">
-            <span
-              className={`difficulty-badge ${getDifficultyColor(
-                result.difficulty
-              )}`}
-            >
-              <Award size={14} />
-              {result.difficulty}
-            </span>
             {result.overview && (
               <span className="overview">{result.overview}</span>
             )}

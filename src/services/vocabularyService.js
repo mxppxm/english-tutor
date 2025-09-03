@@ -1,6 +1,36 @@
 // 词库服务
 // 基于 https://github.com/KyleBing/english-vocabulary 的词库数据
 
+// 常见简单单词列表（用于过滤）
+export const COMMON_WORDS = new Set([
+    // 冠词
+    'a', 'an', 'the',
+    // 代词
+    'i', 'me', 'my', 'mine', 'myself',
+    'you', 'your', 'yours', 'yourself',
+    'he', 'him', 'his', 'himself',
+    'she', 'her', 'hers', 'herself',
+    'it', 'its', 'itself',
+    'we', 'us', 'our', 'ours', 'ourselves',
+    'they', 'them', 'their', 'theirs', 'themselves',
+    'this', 'that', 'these', 'those',
+    // be动词
+    'be', 'am', 'is', 'are', 'was', 'were', 'being', 'been',
+    // 情态动词
+    'can', 'could', 'may', 'might', 'will', 'would', 'shall', 'should', 'must',
+    // 常见动词
+    'do', 'does', 'did', 'have', 'has', 'had', 'get', 'got',
+    // 介词
+    'in', 'on', 'at', 'by', 'for', 'with', 'to', 'of', 'from', 'up', 'out', 'off',
+    // 连词
+    'and', 'or', 'but', 'so', 'if', 'when', 'while', 'as', 'than', 'then',
+    // 副词
+    'not', 'no', 'yes', 'here', 'there', 'now', 'very', 'well', 'too', 'also',
+    // 其他常见词
+    'what', 'where', 'when', 'why', 'how', 'who', 'which', 'whose',
+    'all', 'any', 'some', 'many', 'much', 'more', 'most', 'one', 'two', 'three'
+]);
+
 // 预定义的词库配置
 export const VOCABULARY_LISTS = {
     HighSchool: {
@@ -137,18 +167,29 @@ export async function loadVocabulary(vocabularyId) {
  * 在文本中查找词库中的单词
  * @param {string} text 要分析的文本
  * @param {Array} vocabulary 词库数据
+ * @param {boolean} filterCommonWords 是否过滤常见简单单词
  * @returns {Array} 找到的词汇信息
  */
-export function findVocabularyInText(text, vocabulary) {
+export function findVocabularyInText(text, vocabulary, filterCommonWords = true) {
     if (!text || !vocabulary || vocabulary.length === 0) {
         return [];
+    }
+
+    // 从localStorage获取过滤设置（如果没有传入参数）
+    if (filterCommonWords === undefined || filterCommonWords === null) {
+        filterCommonWords = localStorage.getItem("filter_common_words") !== "false";
     }
 
     // 创建词汇映射表，提高查找效率
     const vocabMap = new Map();
     vocabulary.forEach(item => {
         if (item.word) {
-            vocabMap.set(item.word.toLowerCase(), item);
+            const word = item.word.toLowerCase();
+            // 如果启用过滤且是常见单词，则跳过
+            if (filterCommonWords && COMMON_WORDS.has(word)) {
+                return;
+            }
+            vocabMap.set(word, item);
         }
     });
 
@@ -163,6 +204,11 @@ export function findVocabularyInText(text, vocabulary) {
     const uniqueWords = new Set();
 
     words.forEach(word => {
+        // 如果启用过滤且是常见单词，则跳过
+        if (filterCommonWords && COMMON_WORDS.has(word)) {
+            return;
+        }
+
         if (vocabMap.has(word) && !uniqueWords.has(word)) {
             uniqueWords.add(word);
             const vocabInfo = vocabMap.get(word);

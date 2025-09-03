@@ -103,7 +103,6 @@ const VocabularyLearning = ({
           ...fullWordData,
           context: fullWordData.context || "",
           sourceTitle: vocabularyListName || "词库单词",
-          difficulty: "中级",
         });
 
         setStudying((prev) => {

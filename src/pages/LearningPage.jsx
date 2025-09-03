@@ -3,6 +3,7 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, BookOpen } from "lucide-react";
 import Header from "../components/Header";
 import FlatLearningView from "../components/FlatLearningView";
+import SentenceLearningView from "../components/SentenceLearningView";
 import VocabularyBookModal from "../components/VocabularyBookModal";
 import { getHistoryById } from "../services/historyService";
 
@@ -92,13 +93,6 @@ const LearningPage = () => {
 
         <div className="learning-title">
           <h1>{analysisResult?.title || "英文文本精讲"}</h1>
-          {analysisResult?.difficulty && (
-            <span
-              className={`difficulty-badge difficulty-${analysisResult.difficulty}`}
-            >
-              {analysisResult.difficulty}
-            </span>
-          )}
         </div>
 
         <button
@@ -112,7 +106,16 @@ const LearningPage = () => {
       </div>
 
       <main className="learning-content">
-        {analysisResult && <FlatLearningView result={analysisResult} />}
+        {analysisResult &&
+          // 根据分析模式选择对应的展示组件
+          (analysisResult.analysisMode === "sentence" ||
+          (analysisResult.sentences &&
+            analysisResult.sentences.length > 0 &&
+            !analysisResult.paragraphs?.length) ? (
+            <SentenceLearningView result={analysisResult} />
+          ) : (
+            <FlatLearningView result={analysisResult} />
+          ))}
       </main>
 
       {showVocabularyBook && (

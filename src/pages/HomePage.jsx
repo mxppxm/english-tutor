@@ -1,24 +1,43 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import InputSection from "../components/InputSection";
 import ConfigModal from "../components/ConfigModal";
 import HistoryModal from "../components/HistoryModal";
-import { analyzeText } from "../services/api";
+import PageLoading from "../components/PageLoading";
+import { analyzeText, analyzeSentences } from "../services/api";
 import {
   saveAnalysisToHistory,
   findHistoryByText,
 } from "../services/historyService";
 import { Settings, Clock } from "lucide-react";
+import { preprocessText } from "../utils/textUtils";
 
 const HomePage = () => {
   const navigate = useNavigate();
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
+  const [forceConfig, setForceConfig] = useState(false); // 强制显示配置弹窗
   const [showHistory, setShowHistory] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+
+  // 检查 API key 是否配置
+  const checkApiKeyConfiguration = () => {
+    const provider = localStorage.getItem("ai_provider") || "doubao";
+    const apiKey = localStorage.getItem(`${provider}_api_key`);
+    return !!apiKey?.trim();
+  };
+
+  // 页面加载时检查 API key
+  useEffect(() => {
+    const hasValidApiKey = checkApiKeyConfiguration();
+    if (!hasValidApiKey) {
+      setForceConfig(true);
+      setShowConfig(true);
+    }
+  }, []);
 
   const handleAnalyze = async () => {
     if (!inputText.trim()) {
@@ -96,7 +115,23 @@ const HomePage = () => {
         return;
       }
 
-      const result = await analyzeText(inputText);
+      // 预处理文本：分割句子进行逐句分析（限制8句以内避免超时）
+      console.log("开始文本预处理...");
+      const preprocessResult = preprocessText(inputText, 8);
+      console.log(
+        `文本预处理完成: ${preprocessResult.originalSentenceCount} -> ${preprocessResult.sentenceCount} 个句子`
+      );
+
+      // 使用逐句分析功能
+      const result = await analyzeSentences(preprocessResult.sentences);
+
+      // 在结果中添加预处理信息
+      result.preprocessInfo = {
+        originalSentenceCount: preprocessResult.originalSentenceCount,
+        processedSentenceCount: preprocessResult.sentenceCount,
+        isLimited: preprocessResult.isLimited,
+        sentences: preprocessResult.sentences,
+      };
 
       // 保存到历史记录
       try {
@@ -132,11 +167,7 @@ const HomePage = () => {
   };
 
   const handleLoadExample = () => {
-    const exampleText = `In the past, writing software was better than doing things manually. You build software once and then it works for you forever.
-
-But now, writing software feels worse. It's not a "write once" and "works for you forever" situation. You build something, push it to GitHub or the App Store, and immediately get issues and support tickets. You have to maintain it, fix security issues, and constantly update dependencies.
-
-The effort-to-reward ratio has shifted. Writing software no longer provides the same leverage it once did.`;
+    const exampleText = `It was a sunny Saturday morning when we decided to visit the zoo. My classmates and I gathered at the school gate, all excited about our field trip. Our teacher, Mr. Li, checked the attendance and reminded us about the safety rules. At the zoo entrance, we saw beautiful flowers and tall trees creating a welcoming atmosphere. The monkeys in the first enclosure were incredibly playful and entertaining. They were jumping from branch to branch while some were eating bananas. A baby elephant was spraying water with its trunk, delighting all the visitors. The lions were resting majestically under the shade of large oak trees. Colorful parrots in the aviary were singing melodious songs that filled the air. This educational trip taught us valuable lessons about wildlife conservation.`;
 
     setInputText(exampleText);
   };
@@ -166,7 +197,7 @@ The effort-to-reward ratio has shifted. Writing software no longer provides the 
         <div className="hero-section">
           <h1 className="hero-title">英语文本精讲分析器</h1>
           <p className="hero-subtitle">
-            输入英文文本，获得详细的翻译、词汇、语法和句子分析
+            输入英文文本，获得逐句详细分析：翻译、词汇、语法结构和重点难点
           </p>
         </div>
 
@@ -176,7 +207,8 @@ The effort-to-reward ratio has shifted. Writing software no longer provides the 
           onAnalyze={handleAnalyze}
           onLoadExample={handleLoadExample}
           onClear={handleClear}
-          isLoading={isLoading}
+          isLoading={isLoading} // 用于禁用控件，但不显示按钮 loading
+          showButtonLoading={false} // 新增参数：不显示按钮 loading 状态
         />
 
         {error && <div className="error-message">{error}</div>}
@@ -203,7 +235,23 @@ The effort-to-reward ratio has shifted. Writing software no longer provides the 
         </button>
       </div>
 
-      {showConfig && <ConfigModal onClose={() => setShowConfig(false)} />}
+      {showConfig && (
+        <ConfigModal
+          isForced={forceConfig}
+          onClose={() => {
+            // 如果是强制模式，需要重新检查 API key
+            if (forceConfig) {
+              const hasValidApiKey = checkApiKeyConfiguration();
+              if (hasValidApiKey) {
+                setForceConfig(false);
+                setShowConfig(false);
+              }
+            } else {
+              setShowConfig(false);
+            }
+          }}
+        />
+      )}
 
       {showHistory && (
         <HistoryModal
@@ -211,6 +259,8 @@ The effort-to-reward ratio has shifted. Writing software no longer provides the 
           onSelectHistory={handleSelectFromHistory}
         />
       )}
+
+      <PageLoading isVisible={isLoading} message="正在生成精讲内容..." />
     </div>
   );
 };

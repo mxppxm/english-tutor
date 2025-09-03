@@ -73,7 +73,7 @@ export async function collectWord(wordData) {
             reviewCount: 0,
             lastReviewTime: null,
             isMastered: false,
-            difficulty: wordData.difficulty || "中级",
+
         };
 
         const id = await db.add(STORE_NAME, collectedWord);
@@ -244,10 +244,7 @@ export async function getWordCollectionStats() {
             return stats;
         }, {});
 
-        const difficultyStats = allWords.reduce((stats, word) => {
-            stats[word.difficulty] = (stats[word.difficulty] || 0) + 1;
-            return stats;
-        }, {});
+
 
         return {
             totalWords,
@@ -256,7 +253,6 @@ export async function getWordCollectionStats() {
             unreviewed: totalWords - reviewedWords,
             masteryRate: totalWords > 0 ? Math.round((masteredWords / totalWords) * 100) : 0,
             categoryStats,
-            difficultyStats,
         };
     } catch (error) {
         console.error("获取统计信息失败:", error);
@@ -267,7 +263,6 @@ export async function getWordCollectionStats() {
             unreviewed: 0,
             masteryRate: 0,
             categoryStats: {},
-            difficultyStats: {},
         };
     }
 }
@@ -409,4 +404,15 @@ export async function checkWordsMasteryStatus(words) {
         console.error("批量检查掌握状态失败:", error);
         return new Set();
     }
+}
+
+// ==================== 导出别名 ====================
+
+// 为了兼容 SentenceLearningView 组件，导出别名
+export async function addWordToCollection(wordData) {
+    return await collectWord(wordData);
+}
+
+export async function removeWordFromCollection(word) {
+    return await uncollectWordByText(word);
 }

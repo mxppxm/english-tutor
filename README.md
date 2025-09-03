@@ -1,241 +1,182 @@
-# 🎓 英文精讲助手 (English Tutor)
+# English Tutor - AI 英语学习助手
 
-一个基于AI的英语学习助手，提供智能文本分析、语法精讲和句式解析，让英语学习更高效。
+一个基于现代 AI 技术的英语学习工具，提供深度语法分析和词库学习功能。
 
-## ✨ 核心功能
+## 🚀 项目特性
 
-### 🤖 AI智能分析
-- **多模型支持**: 集成 OpenAI GPT 和 Google Gemini 模型
-- **深度语法分析**: 专注高价值语法点，跳过基础内容
-- **句式结构解析**: 详细分析复杂句子的语法构成
-- **智能翻译**: 提供准确的中文对照翻译
+### 核心功能
 
-### 📚 学习功能
-- **逐段精讲**: 将长文本分段分析，便于理解
-- **语法点归纳**: 系统性整理重要语法知识
-- **难度分级**: 自动评估文本和语法点难度
-- **实例教学**: 提供丰富的例句和使用场景
+- **AI 语法分析**：专业的英语语法和句式深度分析
+- **词库学习**：支持多种考试词库（CET4/6、IELTS、TOEFL、SAT 等）
+- **智能匹配**：自动匹配文章中的重点词汇
+- **历史记录**：保存学习历史，支持复习
 
-### 🎨 用户体验
-- **现代化界面**: 简洁美观的用户界面
-- **响应式设计**: 适配各种屏幕尺寸
-- **流畅动画**: 使用 Framer Motion 提供舒适的交互体验
-- **即时反馈**: 实时显示分析进度和结果
+### 技术架构
 
-## 🚀 快速开始
+- **前端**：React 19 + Vite + Tailwind CSS
+- **后端**：Netlify Functions (云函数)
+- **AI 支持**：豆包 AI、Google Gemini
+- **数据存储**：IndexedDB (本地存储)
+
+### 安全特性
+
+- ✅ **提示词保护**：所有 AI 提示词在后端云函数中加密保护
+- ✅ **API 密钥安全**：通过 HTTPS 加密传输到云函数
+- ✅ **跨域解决**：通过后端代理避免 CORS 问题
+- ✅ **前端代码安全**：前端代码中不包含任何敏感信息
+
+## 🛠️ 开发环境
 
 ### 环境要求
-- Node.js 18+ 
+
+- Node.js 18+
 - npm 或 yarn
+- Netlify CLI (用于本地开发)
 
-### 安装步骤
+### 本地开发
 
-1. **克隆项目**
+1. **安装依赖**
+
+   ```bash
+   npm install
+   ```
+
+2. **启动开发服务器（推荐）**
+
+   ```bash
+   npm run start
+   # 或者
+   npm run dev:functions
+   ```
+
+   这将启动 Netlify 开发环境，支持云函数本地调试
+
+3. **仅前端开发**
+   ```bash
+   npm run dev
+   ```
+
+### 可用脚本
+
 ```bash
-git clone https://github.com/mxppxm/english-tutor.git
-cd english-tutor
+# 开发
+npm run dev              # 仅前端开发服务器
+npm run dev:functions    # Netlify 完整开发环境（推荐）
+npm run start           # 同 dev:functions
+
+# 构建
+npm run build           # 构建前端
+npm run build:functions # Netlify 完整构建
+
+# 其他
+npm run lint           # 代码检查
+npm run preview        # 预览构建结果
 ```
 
-2. **安装依赖**
+## 🌐 部署
+
+### Netlify 部署（推荐）
+
+1. **连接仓库**
+
+   - 在 Netlify 控制台中连接你的 Git 仓库
+
+2. **配置环境变量**
+   在 Netlify 控制台的 Environment Variables 中设置：
+
+   ```
+   NODE_VERSION=18
+   ```
+
+3. **自动部署**
+   - 推送代码到主分支即可自动部署
+   - 构建设置：`npm run build`
+   - 发布目录：`dist`
+
+### 手动部署
+
 ```bash
-npm install
+# 构建项目
+npm run build:functions
+
+# 部署 dist 目录到你的静态托管服务
 ```
 
-3. **启动开发服务器**
-```bash
-npm run dev
+## 🔧 配置说明
+
+### AI 提供商配置
+
+项目支持两种 AI 提供商：
+
+#### 豆包 AI (字节跳动)
+
+- 获取 API Key：[火山引擎控制台](https://console.volcengine.com/ark)
+- 支持模型：
+  - `deepseek-v3-1-250821` (默认，最新高性能)
+  - `doubao-pro-32k`
+  - `doubao-pro-4k`
+  - `doubao-lite-32k`
+  - `doubao-lite-4k`
+
+#### Google Gemini
+
+- 获取 API Key：[Google AI Studio](https://makersuite.google.com/app/apikey)
+- 支持模型：
+  - `gemini-2.0-flash-exp`
+  - `gemini-1.5-flash`
+  - `gemini-1.5-pro`
+  - `gemini-1.0-pro`
+
+### 词库配置
+
+支持的词库类型：
+
+- CET4 (大学英语四级)
+- CET6 (大学英语六级)
+- IELTS (雅思)
+- TOEFL (托福)
+- SAT (学术能力评估测试)
+- HighSchool (高中英语)
+
+## 🏗️ 架构说明
+
+### 前后端分离架构
+
+```
+前端 (React)
+    ↓ API 请求
+云函数 (Netlify Functions)
+    ↓ AI API 调用
+AI 服务商 (豆包/Gemini)
 ```
 
-4. **访问应用**
-打开浏览器访问 `http://localhost:5173`
+### 安全设计
 
-### 🔧 配置AI服务
+1. **提示词保护**：所有 AI 提示词在云函数中定义，前端无法访问
+2. **API 密钥安全**：用户 API 密钥通过 HTTPS 传输到云函数，不存储在后端
+3. **跨域解决**：通过云函数代理 AI 请求，避免浏览器跨域限制
+4. **代码分离**：敏感业务逻辑在云函数中处理，前端只负责界面展示
 
-首次使用需要配置AI API密钥：
-
-1. 点击右下角的⚙️设置按钮
-2. 选择AI服务提供商（OpenAI 或 Gemini）
-3. 输入对应的API密钥
-4. 选择合适的模型（可选）
-
-#### OpenAI配置
-- **API密钥**: 在 [OpenAI Platform](https://platform.openai.com/api-keys) 获取
-- **推荐模型**: `gpt-3.5-turbo` 或 `gpt-4`
-- **自定义端点**: 支持配置自定义API端点（可选）
-
-#### Google Gemini配置
-- **API密钥**: 在 [Google AI Studio](https://aistudio.google.com/app/apikey) 获取
-- **推荐模型**: `gemini-2.0-flash-exp` 或 `gemini-pro`
-
-## 📖 使用说明
-
-### 基本操作
-
-1. **输入文本**: 在文本框中输入或粘贴英文内容
-2. **加载示例**: 点击"加载示例"体验功能
-3. **开始分析**: 点击"开始分析"按钮
-4. **查看结果**: 等待AI分析完成，查看详细解析
-
-### 功能详解
-
-#### 📝 文本分析
-- 支持各种类型的英文文本
-- 自动分段处理长文本
-- 识别复杂语法结构
-- 提供上下文翻译
-
-#### 🔍 语法精讲
-- **重点语法**: 专注高中到大学水平的复杂语法
-- **结构分析**: 详细解释语法规则和使用场景
-- **避免基础**: 智能跳过简单的语法点
-- **实用导向**: 重点分析对学习有帮助的内容
-
-#### 📊 学习视图
-- **扁平视图**: 简洁的逐段展示
-- **增强视图**: 详细的语法和句式分析
-- **段落视图**: 传统的分段学习模式
-
-## 🛠️ 技术栈
-
-### 前端框架
-- **React 19**: 现代化的前端框架
-- **Vite**: 快速的构建工具
-- **CSS3**: 现代化样式
-
-### AI集成
-- **@ai-sdk/openai**: OpenAI SDK集成
-- **@ai-sdk/google**: Google Gemini SDK集成
-- **ai**: 统一的AI SDK接口
-
-### UI组件
-- **Framer Motion**: 流畅的动画效果
-- **Lucide React**: 精美的图标库
-- **React Markdown**: Markdown渲染支持
-
-### 开发工具
-- **ESLint**: 代码质量检查
-- **TypeScript**: 类型安全支持
-
-## 📁 项目结构
+### 文件结构
 
 ```
 english-tutor/
-├── src/
-│   ├── components/          # React组件
-│   │   ├── Header.jsx       # 头部组件
-│   │   ├── InputSection.jsx # 输入区域
-│   │   ├── EnhancedFlatView.jsx # 增强视图
-│   │   ├── ConfigModal.jsx  # 配置弹窗
-│   │   └── ...
-│   ├── services/            # 服务层
-│   │   └── api.js          # AI API调用
-│   ├── types/              # TypeScript类型定义
-│   ├── App.jsx             # 主应用组件
-│   └── main.jsx            # 应用入口
+├── src/                     # 前端源码
+│   ├── components/          # React 组件
+│   ├── services/           # API 服务
+│   ├── pages/              # 页面组件
+│   └── styles/             # 样式文件
+├── netlify/
+│   └── functions/          # 云函数
 ├── public/                 # 静态资源
-├── package.json           # 项目配置
-└── README.md              # 项目说明
+├── netlify.toml           # Netlify 配置
+└── package.json           # 项目配置
 ```
 
-## 🎯 核心特性
+## 🤝 贡献
 
-### 智能语法筛选
-- 严格排除基础语法（and、but、in、on等）
-- 重点分析复杂语法结构（从句、非谓语、特殊句式）
-- 深度解释语法规则和使用场景
-- 提供实用的学习建议
-
-### 高质量分析
-- **准确性**: 语法术语准确，分析逻辑清晰
-- **实用性**: 专注对提高英语水平有帮助的内容
-- **系统性**: 将语法点归类到具体的语法系统
-- **可操作性**: 提供具体的学习和练习建议
-
-### 用户友好
-- **错误处理**: 完善的错误提示和处理机制
-- **状态管理**: 清晰的加载状态和进度反馈
-- **数据持久**: 本地保存API配置
-- **响应式**: 适配各种设备和屏幕尺寸
-
-## 🔧 开发指南
-
-### 脚本命令
-
-```bash
-# 开发环境
-npm run dev
-
-# 构建生产版本
-npm run build
-
-# 代码检查
-npm run lint
-
-# 预览构建结果
-npm run preview
-```
-
-### 环境变量
-
-创建 `.env.local` 文件配置环境变量（可选）：
-
-```env
-# OpenAI配置
-VITE_OPENAI_API_KEY=your_openai_api_key
-VITE_OPENAI_BASE_URL=https://api.openai.com/v1
-
-# Gemini配置
-VITE_GEMINI_API_KEY=your_gemini_api_key
-```
-
-### 自定义配置
-
-应用支持多种自定义配置：
-
-- **AI提供商**: OpenAI 或 Google Gemini
-- **模型选择**: 根据需求选择不同的AI模型
-- **API端点**: 支持自定义OpenAI API端点
-- **分析参数**: 可调整温度、最大token等参数
-
-## 🤝 贡献指南
-
-欢迎提交Issue和Pull Request！
-
-### 开发准则
-- 遵循React最佳实践
-- 保持代码简洁和可读性
-- 添加适当的注释和文档
-- 确保TypeScript类型安全
-
-### 提交规范
-- feat: 新功能
-- fix: 修复bug
-- docs: 文档更新
-- style: 代码格式调整
-- refactor: 重构代码
-- test: 测试相关
-- chore: 构建或工具相关
+欢迎提交 Issue 和 Pull Request！
 
 ## 📄 许可证
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
-
-## 📞 联系方式
-
-- **GitHub**: [mxppxm/english-tutor](https://github.com/mxppxm/english-tutor)
-- **Issues**: [提交问题](https://github.com/mxppxm/english-tutor/issues)
-
-## 🙏 致谢
-
-感谢以下开源项目和服务：
-
-- [React](https://reactjs.org/) - 用户界面框架
-- [Vite](https://vitejs.dev/) - 构建工具
-- [OpenAI](https://openai.com/) - AI服务提供商
-- [Google AI](https://ai.google.dev/) - AI服务提供商
-- [Framer Motion](https://www.framer.com/motion/) - 动画库
-- [Lucide](https://lucide.dev/) - 图标库
-
----
-
-⭐ 如果这个项目对你有帮助，请给个Star支持一下！
+MIT License
