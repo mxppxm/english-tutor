@@ -226,7 +226,7 @@ export const recognizeImageText = async (imageData) => {
     console.log('🖼️ 开始图片文字识别，使用提供商:', provider)
 
     // 调用独立的OCR API
-    const result = await apiRequest('/image-ocr', {
+    const result =await apiRequest('https://1257983504-7k7d2p3dsi.ap-beijing.tencentscf.com', {
       method: 'POST',
       body: JSON.stringify({
         image: imageData,
