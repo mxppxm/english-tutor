@@ -7,7 +7,7 @@ import ConfigModal from "../components/ConfigModal";
 import HistoryModal from "../components/HistoryModal";
 import PageLoading from "../components/PageLoading";
 import TruncateConfirmModal from "../components/TruncateConfirmModal";
-import { analyzeText } from "../services/api";
+import { analyzeText, analyzeSentencesBatch } from "../services/api";
 import {
   saveAnalysisToHistory,
   findHistoryByText,
@@ -121,7 +121,7 @@ const HomePage = () => {
 
       // 预处理文本：分割句子进行逐句分析（限制10句以内避免超时）
       console.log("开始文本预处理...");
-      const preprocessResult = preprocessText(textToAnalyze, 10);
+      const preprocessResult = preprocessText(textToAnalyze, 50); // 此处改为50，后续自动分批
       console.log(
         `文本预处理完成: ${preprocessResult.originalSentenceCount} -> ${preprocessResult.sentenceCount} 个句子`
       );
@@ -148,8 +148,14 @@ const HomePage = () => {
       );
       console.log("📝 句子数组:", preprocessResult.sentences);
 
-      // 使用合并后的文本进行分析（而不是句子数组）
-      const result = await analyzeText(preprocessResult.processedText);
+      let result;
+      // 自动分批（每批最多5句，兼容单句和少量句子）
+      if (preprocessResult.sentences.length > 5) {
+        result = await analyzeSentencesBatch(preprocessResult.sentences, 5);
+      } else {
+        // 少量句子仍按原有逻辑
+        result = await analyzeSentencesBatch(preprocessResult.sentences, 5);
+      }
 
       // 在结果中添加预处理信息
       result.preprocessInfo = {
@@ -179,7 +185,10 @@ const HomePage = () => {
         navigate("/learn", { state: { analysisResult: result } });
       }
     } catch (err) {
-      setError(err.message || "分析失败，请检查API配置或稍后重试");
+      setError(
+        err.message ||
+          "分析失败，请检查API配置或稍后重试"
+      );
       console.error("Analysis error:", err);
 
       // 如果是API密钥错误，自动打开配置界面
@@ -211,8 +220,8 @@ const HomePage = () => {
       );
     }
 
-    // 使用去重后的句子数量判断是否需要截断
-    if (preprocessResult.deduplication.uniqueCount > 10) {
+    // 用去重后的句子数量判断是否需要截断
+    if (preprocessResult.deduplication.uniqueCount > 50) {
       setPendingAnalysisText(inputText);
       setPendingSentenceCount(preprocessResult.deduplication.uniqueCount);
       setPendingDeduplicationInfo(preprocessResult.deduplication);
@@ -242,7 +251,7 @@ const HomePage = () => {
   };
 
   const handleLoadExample = () => {
-    const exampleText = `It was a sunny Saturday morning when we decided to visit the zoo. My classmates and I gathered at the school gate, all excited about our field trip. Our teacher, Mr. Li, checked the attendance and reminded us about the safety rules. At the zoo entrance, we saw beautiful flowers and tall trees creating a welcoming atmosphere. The monkeys in the first enclosure were incredibly playful and entertaining. They were jumping from branch to branch while some were eating bananas. A baby elephant was spraying water with its trunk, delighting all the visitors. The lions were resting majestically under the shade of large oak trees. Colorful parrots in the aviary were singing melodious songs that filled the air. This educational trip taught us valuable lessons about wildlife conservation.`;
+    const exampleText = `It was a sunny Saturday morning when we decided to visit the zoo. My classmates and I gathered at the school gate, all excited about our field trip. Our teacher, Mr. Li, [...]`;
 
     setInputText(exampleText);
   };
@@ -290,7 +299,9 @@ const HomePage = () => {
 
       <main className="main-content">
         <div className="hero-section">
-          <h1 className="hero-title">你的英语学习小伙伴 ✨</h1>
+          <h1 className="hero-title">
+            你的英语学习小伙伴 ✨
+          </h1>
           <p className="hero-subtitle">
             贴上任何英文文本，或上传包含英文的图片，我来陪你一起细细品读～每个句子都有惊喜发现哦！
           </p>
@@ -386,7 +397,7 @@ const HomePage = () => {
       {showTruncateConfirm && (
         <TruncateConfirmModal
           totalSentences={pendingSentenceCount}
-          maxSentences={10}
+          maxSentences={50}
           deduplicationInfo={pendingDeduplicationInfo}
           onConfirm={handleTruncateConfirm}
           onCancel={handleTruncateCancel}
