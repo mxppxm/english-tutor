@@ -150,11 +150,11 @@ const HomePage = () => {
 
       let result;
       // 自动分批（每批最多5句，兼容单句和少量句子）
-      if (preprocessResult.sentences.length > 5) {
-        result = await analyzeSentencesBatch(preprocessResult.sentences, 5);
+      if (preprocessResult.sentences.length > 3) {
+        result = await analyzeSentencesBatch(preprocessResult.sentences, 3);
       } else {
         // 少量句子仍按原有逻辑
-        result = await analyzeSentencesBatch(preprocessResult.sentences, 5);
+        result = await analyzeSentencesBatch(preprocessResult.sentences, 3);
       }
 
       // 在结果中添加预处理信息
