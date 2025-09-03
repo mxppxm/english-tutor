@@ -420,6 +420,113 @@ body {
   color: var(--text-primary);
 }
 
+/* Phrases Section for Learning Views */
+.phrases-section {
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  margin: 1.5rem 0;
+  overflow: hidden;
+}
+
+.phrases-header {
+  background: var(--bg-secondary);
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.phrases-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.phrases-content {
+  padding: 1.5rem;
+}
+
+/* Phrase Actions */
+.phrase-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.speak-phrase-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  transition: var(--transition);
+}
+
+.speak-phrase-btn:hover {
+  background: var(--bg-secondary);
+  color: var(--accent-color);
+}
+
+/* Example Sentence Component */
+.example-sentence {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--accent-color);
+}
+
+.example-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.example-label {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.speak-example-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  transition: var(--transition);
+}
+
+.speak-example-btn:hover {
+  background: var(--bg-primary);
+  color: var(--accent-color);
+}
+
+.example-content {
+  line-height: 1.5;
+}
+
+.example-text {
+  font-style: italic;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.example-translation {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
 /* Grammar List */
 .grammar-list {
   display: flex;
@@ -635,8 +742,8 @@ body {
   border-radius: var(--radius-lg);
   width: 90%;
   max-width: 500px;
-  height: min(107vh, 95vh); /* 增加三分之一高度，但不超过95vh */
-  max-height: 800px; /* 同步增加最大高度 */
+  min-height: 60vh; /* 最小高度 */
+  max-height: 90vh; /* 最大高度 */
   overflow: hidden;
   box-shadow: var(--shadow-lg);
   display: flex;
@@ -5335,8 +5442,10 @@ body {
 /* 重点单词学习弹窗 */
 .vocabulary-learning-modal {
   max-width: 900px;
-  height: min(107vh, 95vh); /* 增加三分之一高度，但不超过95vh */
+  min-height: 60vh; /* 最小高度 */
+  max-height: 90vh; /* 最大高度 */
   width: 90vw;
+  overflow: visible; /* 允许内容正常显示 */
 }
 
 /* 增强的tooltip样式 */
@@ -5944,5 +6053,259 @@ body {
 
   .summary-section {
     padding: 1.5rem;
+  }
+}
+
+/* 截断确认弹窗样式 - 传统清晰样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  border: 1px solid #e5e7eb;
+}
+
+.modal-header {
+  padding: 1.5rem 1.5rem 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  border-bottom: 1px solid #f3f4f6;
+  background: #fafbfc;
+  border-radius: 12px 12px 0 0;
+}
+
+.modal-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0.5rem 0 1rem 0;
+}
+
+.close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.modal-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.modal-icon.warning {
+  background: #fbbf24;
+  color: white;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+.modal-body {
+  padding: 1.5rem;
+  background: white;
+}
+
+.warning-text {
+  font-size: 1.1rem;
+  color: #111827;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+  text-align: center;
+  font-weight: 500;
+}
+
+.warning-text strong {
+  color: #d97706;
+  font-weight: 700;
+}
+
+.info-text {
+  font-size: 0.95rem;
+  color: #4b5563;
+  margin-bottom: 1rem;
+  text-align: left;
+  font-weight: 500;
+}
+
+.suggestion-list {
+  list-style: none;
+  margin: 1.25rem 0;
+  padding: 1.25rem;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.suggestion-list li {
+  padding: 0.75rem 0;
+  color: #1f2937;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-weight: 500;
+}
+
+.suggestion-list li:not(:last-child) {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.suggestion-list li strong {
+  color: #111827;
+  font-weight: 600;
+}
+
+.tip-box {
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-top: 1.25rem;
+  font-size: 0.9rem;
+  color: #1e40af;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.tip-box strong {
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.dedup-info {
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  border-radius: 10px;
+  padding: 1rem;
+  margin: 1.25rem 0;
+}
+
+.dedup-text {
+  font-size: 0.95rem;
+  color: #14532d;
+  line-height: 1.6;
+  margin: 0;
+  font-weight: 500;
+}
+
+.dedup-text strong {
+  color: #15803d;
+  font-weight: 700;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  background: white;
+  border-radius: 0 0 12px 12px;
+}
+
+.secondary-button,
+.primary-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  min-width: 130px;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.secondary-button {
+  background: #f9fafb;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.secondary-button:hover {
+  background: #f3f4f6;
+  color: #111827;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.primary-button {
+  background: #3b82f6;
+  color: white;
+}
+
+.primary-button:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* 移动端样式调整 */
+@media (max-width: 768px) {
+  .modal-content {
+    width: 95%;
+    margin: 1rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .secondary-button,
+  .primary-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .modal-header {
+    padding: 1.25rem 1.25rem 0 1.25rem;
+  }
+
+  .modal-body {
+    padding: 1.25rem;
+  }
+
+  .modal-actions {
+    padding: 0 1.25rem 1.25rem 1.25rem;
   }
 }

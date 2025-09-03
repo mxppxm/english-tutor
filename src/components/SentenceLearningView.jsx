@@ -6,6 +6,7 @@ import {
   PenTool,
   MessageCircle,
   Lightbulb,
+  Hash,
   ChevronDown,
   ChevronUp,
   Eye,
@@ -20,6 +21,7 @@ import remarkGfm from "remark-gfm";
 import SimpleHighlightedText from "./SimpleHighlightedText";
 import VocabularyLearning from "./VocabularyLearning";
 import WordTooltip from "./WordTooltip";
+import ExampleSentence from "./ExampleSentence";
 import {
   addWordToCollection,
   removeWordFromCollection,
@@ -56,6 +58,7 @@ const SentenceLearningView = ({ result }) => {
         initialExpandedState[`structure-${index}`] = true;
         initialExpandedState[`vocabulary-${index}`] = true;
         initialExpandedState[`grammar-${index}`] = true;
+        initialExpandedState[`phrases-${index}`] = true;
         initialExpandedState[`keypoints-${index}`] = true;
       });
       setExpandedSections(initialExpandedState);
@@ -79,6 +82,7 @@ const SentenceLearningView = ({ result }) => {
         newExpandedState[`structure-${index}`] = newAllExpanded;
         newExpandedState[`vocabulary-${index}`] = newAllExpanded;
         newExpandedState[`grammar-${index}`] = newAllExpanded;
+        newExpandedState[`phrases-${index}`] = newAllExpanded;
         newExpandedState[`keypoints-${index}`] = newAllExpanded;
       });
 
@@ -188,7 +192,7 @@ const SentenceLearningView = ({ result }) => {
       {/* 完整原文展示 */}
       <div className="full-text-section">
         <div className="full-text-header">
-          <h2>完整原文</h2>
+          <h2>原文</h2>
         </div>
         <div className="full-text-content">
           <SimpleHighlightedText
@@ -470,10 +474,14 @@ const SentenceLearningView = ({ result }) => {
                                   {grammarPoint.explanation}
                                 </div>
                                 {grammarPoint.example && (
-                                  <div className="grammar-example">
-                                    <strong>例句：</strong>
-                                    {grammarPoint.example}
-                                  </div>
+                                  <ExampleSentence
+                                    example={grammarPoint.example}
+                                    translation={
+                                      grammarPoint.exampleTranslation
+                                    }
+                                    label="例句"
+                                    className="grammar-example"
+                                  />
                                 )}
                                 {grammarPoint.usage && (
                                   <div className="grammar-usage">
@@ -484,6 +492,70 @@ const SentenceLearningView = ({ result }) => {
                               </div>
                             )
                           )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 重点短语 */}
+                {sentence.phrases && sentence.phrases.length > 0 && (
+                  <div className="content-section">
+                    <div
+                      className="section-header clickable"
+                      onClick={() => toggleSection(`phrases-${index}`)}
+                    >
+                      <h4>
+                        <Hash size={18} />
+                        重点短语 ({sentence.phrases.length})
+                      </h4>
+                      <span className="toggle-icon">
+                        {expandedSections[`phrases-${index}`] ? "−" : "+"}
+                      </span>
+                    </div>
+                    {expandedSections[`phrases-${index}`] && (
+                      <div className="section-content">
+                        <div className="phrases-grid">
+                          {sentence.phrases.map((phrase, phraseIndex) => (
+                            <div key={phraseIndex} className="phrase-card">
+                              <div className="phrase-header">
+                                <span className="phrase-text">
+                                  {phrase.phrase}
+                                </span>
+                                <div className="phrase-actions">
+                                  <button
+                                    onClick={() => speakWord(phrase.phrase)}
+                                    className="speak-phrase-btn"
+                                    title="朗读短语"
+                                  >
+                                    <Volume2 size={14} />
+                                  </button>
+                                  {phrase.type && (
+                                    <span className="phrase-type">
+                                      {phrase.type}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="phrase-translation">
+                                {phrase.translation}
+                              </div>
+                              {phrase.usage && (
+                                <div className="phrase-usage">
+                                  <span className="usage-label">用法:</span>{" "}
+                                  {phrase.usage}
+                                </div>
+                              )}
+                              {phrase.example && (
+                                <ExampleSentence
+                                  example={phrase.example}
+                                  translation={phrase.exampleTranslation}
+                                  label="例句"
+                                  className="phrase-example"
+                                />
+                              )}
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}

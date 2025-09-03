@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain } from "lucide-react";
 
-const PageLoading = ({ isVisible, message = "正在生成精讲内容..." }) => {
+const PageLoading = ({ isVisible, message = "正在用心为你分析文章..." }) => {
   if (!isVisible) return null;
 
   return (
@@ -61,7 +61,7 @@ const PageLoading = ({ isVisible, message = "正在生成精讲内容..." }) => 
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8 }}
           >
-            <p>AI 正在深度分析您的文本内容</p>
+            <p>AI 小助手正在认真阅读你的文章呢～</p>
           </motion.div>
         </motion.div>
       </motion.div>

@@ -61,7 +61,7 @@ const LearningPage = () => {
         <Header />
         <div className="loading-container">
           <div className="loading-spinner"></div>
-          <p>加载中...</p>
+          <p>正在准备学习内容...</p>
         </div>
       </div>
     );
@@ -74,7 +74,7 @@ const LearningPage = () => {
         <div className="error-container">
           <p className="error-message">{error}</p>
           <button onClick={handleBack} className="btn btn-primary">
-            返回首页
+            回到首页
           </button>
         </div>
       </div>
@@ -88,20 +88,20 @@ const LearningPage = () => {
       <div className="learning-header">
         <button onClick={handleBack} className="back-button">
           <ArrowLeft size={20} />
-          返回首页
+          回到首页
         </button>
 
         <div className="learning-title">
-          <h1>{analysisResult?.title || "英文文本精讲"}</h1>
+          <h1>{analysisResult?.title || "让我们一起学习这篇文章 📖"}</h1>
         </div>
 
         <button
           onClick={() => setShowVocabularyBook(true)}
           className="vocabulary-book-button"
-          title="单词本"
+          title="我的单词收藏"
         >
           <BookOpen size={20} />
-          单词本
+          单词收藏
         </button>
       </div>
 

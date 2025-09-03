@@ -255,21 +255,21 @@ const VocabularyCard = ({
 
         <div className="card-actions">
           <button
-            className={`action-btn studying ${isStudying ? "active" : ""}`}
-            onClick={onToggleStudying}
-            title={isStudying ? "移出单词本" : "加入单词本"}
-          >
-            <Star size={16} />
-            {isStudying ? "已在单词本" : "加入单词本"}
-          </button>
-
-          <button
             className={`action-btn mastered ${isMastered ? "active" : ""}`}
             onClick={onToggleMastered}
             title={isMastered ? "标记为未掌握" : "掌握后不再高亮"}
           >
             <Check size={16} />
             {isMastered ? "已掌握" : "掌握"}
+          </button>
+
+          <button
+            className={`action-btn studying ${isStudying ? "active" : ""}`}
+            onClick={onToggleStudying}
+            title={isStudying ? "移出单词本" : "加入单词本"}
+          >
+            <Star size={16} />
+            {isStudying ? "已在单词本" : "加入单词本"}
           </button>
         </div>
       </div>

@@ -29,7 +29,7 @@ const InputSection = ({
     // 给出句子数量提示
     if (stats.sentenceCount > 15) {
       setSentenceWarning(
-        `输入了 ${stats.sentenceCount} 个句子，句子较多需要更长分析时间，请耐心等待`
+        `这篇文章有 ${stats.sentenceCount} 个句子呢，内容很丰富！处理起来需要多一点时间，泡杯茶等等我吧 ☕`
       );
     } else {
       setSentenceWarning("");
@@ -64,7 +64,7 @@ const InputSection = ({
   return (
     <section className="input-section">
       <div className="section-header">
-        <h2>输入英文文本</h2>
+        <h2>来，把文章给我看看 📝</h2>
         <div className="action-buttons">
           <button
             className="btn btn-secondary"
@@ -72,7 +72,7 @@ const InputSection = ({
             disabled={isLoading}
           >
             <FileText size={16} />
-            加载示例
+            试试这个例子
           </button>
           <button
             className="btn btn-secondary"
@@ -80,7 +80,7 @@ const InputSection = ({
             disabled={isLoading || !inputText}
           >
             <Trash2 size={16} />
-            清空
+            重新开始
           </button>
         </div>
       </div>
@@ -90,7 +90,7 @@ const InputSection = ({
           className={`text-input ${inputError ? "error" : ""}`}
           value={inputText}
           onChange={handleInputChange}
-          placeholder="在这里粘贴或输入你想要精讲的英文文本，系统会对每个句子进行详细分析..."
+          placeholder="把你想学习的英文文章贴到这里吧～不管是新闻、小说还是学术文章，我都陪你慢慢读懂每一句话..."
           disabled={isLoading}
         />
 
@@ -108,8 +108,8 @@ const InputSection = ({
         <div className="input-footer">
           <span className="word-count">
             {textStats.sentenceCount > 0
-              ? `${textStats.sentenceCount} 个句子 · ${textStats.wordCount} 个单词`
-              : "请输入文本（将进行逐句精讲分析）"}
+              ? `发现了 ${textStats.sentenceCount} 个句子，${textStats.wordCount} 个单词，准备好了吗？`
+              : "把文字贴进来，我们一起探索每个句子的奥秘吧 ～"}
           </span>
 
           <button
@@ -122,12 +122,12 @@ const InputSection = ({
             {isLoading && showButtonLoading ? (
               <>
                 <span className="spinner"></span>
-                生成中...
+                正在努力分析中...
               </>
             ) : (
               <>
                 <Sparkles size={16} />
-                生成精讲
+                开始分析
               </>
             )}
           </button>

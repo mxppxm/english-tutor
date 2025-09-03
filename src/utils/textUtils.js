@@ -58,6 +58,63 @@ export const splitIntoSentences = (text) => {
 };
 
 /**
+ * 句子去重处理
+ * @param {string[]} sentences - 句子数组
+ * @returns {object} 去重结果包含unique sentences和mapping信息
+ */
+const deduplicateSentences = (sentences) => {
+    const uniqueSentences = [];
+    const sentenceMap = new Map(); // 记录每个句子的首次出现位置
+    const duplicateInfo = new Map(); // 记录重复句子的所有位置
+    const originalToUniqueMap = []; // 原始位置到去重后位置的映射
+
+    sentences.forEach((sentence, originalIndex) => {
+        // 标准化句子用于比较（去除多余空格，统一大小写）
+        const normalizedSentence = sentence.trim().toLowerCase();
+
+        if (sentenceMap.has(normalizedSentence)) {
+            // 这是重复句子
+            const firstIndex = sentenceMap.get(normalizedSentence);
+            originalToUniqueMap[originalIndex] = firstIndex;
+
+            // 记录重复信息
+            if (!duplicateInfo.has(normalizedSentence)) {
+                duplicateInfo.set(normalizedSentence, [firstIndex]);
+            }
+            duplicateInfo.get(normalizedSentence).push(originalIndex);
+        } else {
+            // 这是新句子
+            const uniqueIndex = uniqueSentences.length;
+            sentenceMap.set(normalizedSentence, uniqueIndex);
+            originalToUniqueMap[originalIndex] = uniqueIndex;
+            uniqueSentences.push(sentence);
+        }
+    });
+
+    // 构建重复句子详细信息
+    const duplicates = [];
+    duplicateInfo.forEach((positions, normalizedSentence) => {
+        if (positions.length > 1) {
+            duplicates.push({
+                sentence: sentences[positions[0]], // 使用原始句子（保持大小写）
+                normalizedSentence,
+                positions,
+                count: positions.length
+            });
+        }
+    });
+
+    return {
+        uniqueSentences,
+        originalToUniqueMap,
+        duplicates,
+        originalCount: sentences.length,
+        uniqueCount: uniqueSentences.length,
+        duplicateCount: sentences.length - uniqueSentences.length
+    };
+};
+
+/**
  * 预处理文本为句子数组
  * @param {string} text - 输入文本
  * @param {number} maxSentences - 最大句子数量（可选，默认不限制）
@@ -66,20 +123,52 @@ export const splitIntoSentences = (text) => {
 export const preprocessText = (text, maxSentences = null) => {
     const sentences = splitIntoSentences(text);
 
-    // 根据需要限制句子数量
-    const finalSentences = maxSentences ? sentences.slice(0, maxSentences) : sentences;
+    // 句子去重处理
+    const deduplicateResult = deduplicateSentences(sentences);
 
-    // 重新组合为文本（用于兼容性）
-    const processedText = finalSentences.join(' ');
+    console.log(`句子去重完成: ${deduplicateResult.originalCount} -> ${deduplicateResult.uniqueCount} 个句子`);
+    if (deduplicateResult.duplicateCount > 0) {
+        console.log(`发现 ${deduplicateResult.duplicateCount} 个重复句子，已去重:`,
+            deduplicateResult.duplicates.map(d => `"${d.sentence}" (${d.count}次)`).join(', '));
+    }
+
+    // 根据需要限制句子数量（在去重后进行限制）
+    const limitedSentences = maxSentences ?
+        deduplicateResult.uniqueSentences.slice(0, maxSentences) :
+        deduplicateResult.uniqueSentences;
+
+    // 重新组合为文本（用于兼容性），确保句子间有正确分隔
+    // 确保每个句子都以句号结尾，然后用空格连接
+    const processedText = limitedSentences
+        .map(sentence => {
+            const trimmed = sentence.trim();
+            // 确保句子以标点符号结尾
+            if (!/[.!?]$/.test(trimmed)) {
+                return trimmed + '.';
+            }
+            return trimmed;
+        })
+        .join(' ');
+
+    console.log(`✅ 文本预处理完成: ${limitedSentences.length} 个句子`);
 
     return {
         originalText: text,
         processedText,
-        sentences: finalSentences,
-        sentenceCount: finalSentences.length,
+        sentences: limitedSentences,
+        sentenceCount: limitedSentences.length,
         originalSentenceCount: sentences.length,
-        isLimited: maxSentences ? sentences.length > maxSentences : false,
-        maxSentences: maxSentences || sentences.length
+        isLimited: maxSentences ? deduplicateResult.uniqueSentences.length > maxSentences : false,
+        maxSentences: maxSentences || deduplicateResult.uniqueSentences.length,
+        // 新增：去重相关信息
+        deduplication: {
+            originalCount: deduplicateResult.originalCount,
+            uniqueCount: deduplicateResult.uniqueCount,
+            duplicateCount: deduplicateResult.duplicateCount,
+            duplicates: deduplicateResult.duplicates,
+            originalToUniqueMap: deduplicateResult.originalToUniqueMap,
+            hasDeduplication: deduplicateResult.duplicateCount > 0
+        }
     };
 };
 
@@ -92,7 +181,7 @@ export const validateTextForSentenceAnalysis = (text) => {
     if (!text || typeof text !== 'string') {
         return {
             isValid: false,
-            error: '请输入有效的文本'
+            error: '呀，这里好像没有文字诶～请输入一些内容吧'
         };
     }
 
@@ -100,7 +189,7 @@ export const validateTextForSentenceAnalysis = (text) => {
     if (trimmedText.length === 0) {
         return {
             isValid: false,
-            error: '请输入文本内容'
+            error: '这里看起来还是空的～快给我点文字来分析吧'
         };
     }
 
@@ -109,7 +198,7 @@ export const validateTextForSentenceAnalysis = (text) => {
     if (sentences.length === 0) {
         return {
             isValid: false,
-            error: '未能识别到有效的句子，请检查文本格式'
+            error: '嗯...我没找到完整的句子，可以试试加点标点符号吗？'
         };
     }
 
@@ -118,7 +207,7 @@ export const validateTextForSentenceAnalysis = (text) => {
     if (!hasEnglish) {
         return {
             isValid: false,
-            error: '请输入包含英文内容的文本'
+            error: '咦，这里好像没有英文呢～我是专门看英文的哦'
         };
     }
 
@@ -130,7 +219,7 @@ export const validateTextForSentenceAnalysis = (text) => {
     if (englishRatio < 0.3) {
         return {
             isValid: false,
-            error: '输入的英文内容过少，请确保主要为英文文本'
+            error: '英文内容有点少呢～我更擅长分析英文文章哦'
         };
     }
 

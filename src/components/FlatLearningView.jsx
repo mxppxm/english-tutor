@@ -10,6 +10,7 @@ import {
   Heart,
   HeartOff,
   Star,
+  Hash,
   X,
   Volume2,
 } from "lucide-react";
@@ -24,6 +25,7 @@ import {
 import SimpleHighlightedText from "./SimpleHighlightedText";
 import VocabularyLearning from "./VocabularyLearning";
 import WordTooltip from "./WordTooltip";
+import ExampleSentence from "./ExampleSentence";
 
 // 高亮文本中英文部分的辅助函数
 const highlightEnglishInText = (text) => {
@@ -443,10 +445,12 @@ const FlatLearningView = ({ result }) => {
                             {highlightEnglishInText(item.explanation)}
                           </div>
                           {item.example && (
-                            <div className="grammar-example">
-                              <span className="example-label">例句：</span>
-                              {highlightEnglishInText(item.example)}
-                            </div>
+                            <ExampleSentence
+                              example={item.example}
+                              translation={item.exampleTranslation}
+                              label="例句"
+                              className="grammar-example"
+                            />
                           )}
                         </div>
                       ))}

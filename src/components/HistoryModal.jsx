@@ -54,7 +54,7 @@ const HistoryModal = ({ onClose, onSelectHistory }) => {
         setCurrentPage(result.currentPage);
         setTotalPages(result.totalPages);
       } catch (error) {
-        console.error("加载历史记录失败:", error);
+        console.error("加载学习记录失败:", error);
       } finally {
         setLoading(false);
       }
@@ -92,12 +92,12 @@ const HistoryModal = ({ onClose, onSelectHistory }) => {
 
   // 删除单个历史记录
   const handleDelete = async (id) => {
-    if (window.confirm("确定要删除这条历史记录吗？")) {
+    if (window.confirm("确定要删除这条学习记录吗？删掉就找不回来了哦～")) {
       try {
         await deleteHistoryById(id);
         loadHistory(currentPage);
       } catch (error) {
-        alert("删除失败: " + error.message);
+        alert("哎呀，删除失败了: " + error.message);
       }
     }
   };
@@ -145,7 +145,7 @@ const HistoryModal = ({ onClose, onSelectHistory }) => {
         <div className="modal-header fixed-header">
           <div className="flex items-center gap-3">
             <Clock className="w-6 h-6 text-blue-600" />
-            <h2>学习历史</h2>
+            <h2>我们一起学过的文章 📖</h2>
           </div>
 
           <div className="header-buttons">
@@ -162,7 +162,7 @@ const HistoryModal = ({ onClose, onSelectHistory }) => {
             <Search className="search-icon" />
             <input
               type="text"
-              placeholder="搜索历史记录..."
+              placeholder="找找看我们学过什么..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -178,7 +178,7 @@ const HistoryModal = ({ onClose, onSelectHistory }) => {
           ) : historyData.length === 0 ? (
             <div className="history-empty">
               <BookOpen className="history-empty-icon" />
-              <p>暂无历史记录</p>
+              <p>还没有学习记录呢，快去分析一些文章吧～</p>
             </div>
           ) : (
             <div className="history-list">
@@ -254,7 +254,7 @@ const HistoryModal = ({ onClose, onSelectHistory }) => {
         {totalPages > 1 && (
           <div className="history-pagination">
             <div className="history-pagination-info">
-              第 {currentPage} 页，共 {totalPages} 页
+              第 {currentPage} 页 / 共 {totalPages} 页
             </div>
             <div className="history-pagination-controls">
               <button

@@ -42,7 +42,11 @@ const ConfigModal = ({ isForced = false, onClose }) => {
     // 验证当前选择的提供商是否有API密钥
     const currentApiKey = provider === "doubao" ? doubaoKey : geminiKey;
     if (!currentApiKey.trim()) {
-      alert(`请输入 ${provider === "doubao" ? "豆包" : "Gemini"} 的API密钥`);
+      alert(
+        `别忘了输入 ${
+          provider === "doubao" ? "豆包" : "Gemini"
+        } 的 API 密钥哦～`
+      );
       return;
     }
 
@@ -76,7 +80,9 @@ const ConfigModal = ({ isForced = false, onClose }) => {
           <div className="modal-header fixed-header">
             <h2>
               {activeTab === "api" ? <Key size={24} /> : <BookOpen size={24} />}
-              {activeTab === "api" ? "API 配置" : "词库配置"}
+              {activeTab === "api"
+                ? "让我们连接智能助手 🤖"
+                : "选择学习词库 📚"}
               {isForced && activeTab === "api" && (
                 <span className="required-badge">必须配置</span>
               )}
@@ -95,7 +101,7 @@ const ConfigModal = ({ isForced = false, onClose }) => {
               onClick={() => setActiveTab("api")}
             >
               <Key size={18} />
-              API 设置
+              连接助手
             </button>
             <button
               className={`modal-tab ${
@@ -109,7 +115,7 @@ const ConfigModal = ({ isForced = false, onClose }) => {
               }}
             >
               <BookOpen size={18} />
-              词库设置
+              词库伴侣
             </button>
           </div>
 
@@ -122,10 +128,11 @@ const ConfigModal = ({ isForced = false, onClose }) => {
                     <div className="notice-content">
                       <Key size={20} />
                       <div>
-                        <h4>需要配置 API 密钥</h4>
+                        <h4>嗨！我需要一个智能助手 👋</h4>
                         <p>
-                          使用英语精讲功能需要配置 AI 提供商的 API
-                          密钥。请选择一个提供商并输入有效的 API 密钥。
+                          要给你做精彩的文本分析，我需要连接到 AI
+                          服务。选择一个你喜欢的 AI 助手，
+                          输入对应的密钥，我们就可以开始学习之旅啦！
                         </p>
                       </div>
                     </div>
@@ -133,7 +140,7 @@ const ConfigModal = ({ isForced = false, onClose }) => {
                 )}
                 {/* AI 提供商选择 */}
                 <div className="form-group">
-                  <label>选择 AI 提供商</label>
+                  <label>选择你的 AI 学习伙伴</label>
                   <div className="provider-tabs">
                     <button
                       className={`provider-tab ${
@@ -167,7 +174,7 @@ const ConfigModal = ({ isForced = false, onClose }) => {
                           id="doubaoKey"
                           value={doubaoKey}
                           onChange={(e) => setDoubaoKey(e.target.value)}
-                          placeholder="您的豆包API密钥..."
+                          placeholder="把你的豆包 API 密钥粘贴到这里..."
                           className="form-input"
                         />
                         <button
@@ -178,13 +185,13 @@ const ConfigModal = ({ isForced = false, onClose }) => {
                         </button>
                       </div>
                       <small className="form-hint">
-                        您的API密钥将安全地存储在浏览器本地。
+                        别担心，你的 API 密钥只存在本地浏览器，很安全哦～
                         <a
                           href="https://console.volcengine.com/ark"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          获取API密钥
+                          还没有密钥？点这里获取
                         </a>
                       </small>
                     </div>
@@ -239,13 +246,13 @@ const ConfigModal = ({ isForced = false, onClose }) => {
                         </button>
                       </div>
                       <small className="form-hint">
-                        您的API密钥将安全地存储在浏览器本地。
+                        放心，你的 API 密钥只存在本地浏览器，绝对安全～
                         <a
                           href="https://makersuite.google.com/app/apikey"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          获取API密钥
+                          需要获取密钥？点击这里
                         </a>
                       </small>
                     </div>
@@ -295,23 +302,23 @@ const ConfigModal = ({ isForced = false, onClose }) => {
                 />
 
                 <div className="vocabulary-tips">
-                  <h4>🎯 词库功能说明</h4>
+                  <h4>🎯 词库小助手说明</h4>
                   <ul>
-                    <li>选择词库后，系统会在文章分析中自动标记匹配的单词</li>
-                    <li>标记的单词会在"重点单词学习"模块中显示</li>
-                    <li>您可以对找到的单词进行学习标记和掌握记录</li>
-                    <li>词库数据会缓存在浏览器中，提高加载速度</li>
+                    <li>选好词库后，我会在文章里自动帮你找出重点单词</li>
+                    <li>找到的单词会在"重点单词学习"区域等你来学习</li>
+                    <li>你可以标记每个单词的学习状态，记录自己的进步</li>
+                    <li>词库数据会保存在本地，下次打开更快哦</li>
                   </ul>
 
                   <div className="vocabulary-note">
-                    <strong>提示：</strong>
-                    首次选择词库时需要从网络加载数据，请耐心等待。
+                    <strong>小提示：</strong>
+                    第一次选择词库时需要下载数据，稍等一下就好啦～
                   </div>
                 </div>
 
                 {/* 过滤设置 */}
                 <div className="vocabulary-filter-settings">
-                  <h4>📝 过滤设置</h4>
+                  <h4>📝 智能过滤</h4>
                   <div className="filter-option">
                     <label className="switch-label">
                       <input
@@ -321,11 +328,11 @@ const ConfigModal = ({ isForced = false, onClose }) => {
                         className="switch-input"
                       />
                       <span className="switch-slider"></span>
-                      过滤常见简单单词
+                      过滤简单常见单词
                     </label>
                     <p className="filter-description">
-                      启用后，将过滤掉如 "the", "and", "my", "is"
-                      等常见简单单词， 避免它们被标记为重点单词。推荐保持开启。
+                      开启后会自动忽略 "the"、"and"、"my"、"is" 这些简单单词，
+                      让我们专注学习真正有用的词汇。建议保持开启哦～
                     </p>
                   </div>
                 </div>
@@ -336,12 +343,12 @@ const ConfigModal = ({ isForced = false, onClose }) => {
           <div className="modal-footer">
             {!isForced && (
               <button className="btn btn-secondary" onClick={onClose}>
-                取消
+                稍后再说
               </button>
             )}
             <button className="btn btn-primary" onClick={handleSave}>
               <Save size={16} />
-              {isForced ? "保存并继续" : "保存配置"}
+              {isForced ? "保存，开始学习！" : "保存设置"}
             </button>
           </div>
         </motion.div>

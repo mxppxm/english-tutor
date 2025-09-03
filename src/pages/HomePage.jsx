@@ -5,7 +5,8 @@ import InputSection from "../components/InputSection";
 import ConfigModal from "../components/ConfigModal";
 import HistoryModal from "../components/HistoryModal";
 import PageLoading from "../components/PageLoading";
-import { analyzeText, analyzeSentences } from "../services/api";
+import TruncateConfirmModal from "../components/TruncateConfirmModal";
+import { analyzeText } from "../services/api";
 import {
   saveAnalysisToHistory,
   findHistoryByText,
@@ -20,6 +21,11 @@ const HomePage = () => {
   const [showConfig, setShowConfig] = useState(false);
   const [forceConfig, setForceConfig] = useState(false); // 强制显示配置弹窗
   const [showHistory, setShowHistory] = useState(false);
+  const [showTruncateConfirm, setShowTruncateConfirm] = useState(false);
+  const [pendingAnalysisText, setPendingAnalysisText] = useState("");
+  const [pendingSentenceCount, setPendingSentenceCount] = useState(0);
+  const [pendingDeduplicationInfo, setPendingDeduplicationInfo] =
+    useState(null);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
 
@@ -39,12 +45,8 @@ const HomePage = () => {
     }
   }, []);
 
-  const handleAnalyze = async () => {
-    if (!inputText.trim()) {
-      setError("请输入要分析的英文文本");
-      return;
-    }
-
+  // 执行实际的分析逻辑
+  const performAnalysis = async (textToAnalyze) => {
     setIsLoading(true);
     setError(null);
     setSuccessMessage(null);
@@ -52,7 +54,7 @@ const HomePage = () => {
     try {
       // 首先检查历史记录中是否已经有相同的文本
       console.log("检查历史记录中是否存在相同文本...");
-      const existingHistory = await findHistoryByText(inputText);
+      const existingHistory = await findHistoryByText(textToAnalyze);
 
       if (existingHistory) {
         console.log("找到匹配的历史记录，直接使用:", existingHistory.id);
@@ -115,15 +117,37 @@ const HomePage = () => {
         return;
       }
 
-      // 预处理文本：分割句子进行逐句分析（限制8句以内避免超时）
+      // 预处理文本：分割句子进行逐句分析（限制10句以内避免超时）
       console.log("开始文本预处理...");
-      const preprocessResult = preprocessText(inputText, 8);
+      const preprocessResult = preprocessText(textToAnalyze, 10);
       console.log(
         `文本预处理完成: ${preprocessResult.originalSentenceCount} -> ${preprocessResult.sentenceCount} 个句子`
       );
 
-      // 使用逐句分析功能
-      const result = await analyzeSentences(preprocessResult.sentences);
+      // 显示去重信息
+      if (preprocessResult.deduplication.hasDeduplication) {
+        console.log(
+          `🔄 句子去重: ${preprocessResult.deduplication.originalCount} -> ${preprocessResult.deduplication.uniqueCount} 个句子`
+        );
+        setSuccessMessage(
+          `🔄 检测到 ${preprocessResult.deduplication.duplicateCount} 个重复句子已自动去重，节省分析资源～`
+        );
+        // 短暂显示去重提示后清除
+        setTimeout(() => setSuccessMessage(null), 3000);
+      }
+
+      console.log(
+        "📝 传递给AI分析的文本（去重后）:",
+        preprocessResult.processedText
+      );
+      console.log(
+        "📝 processedText长度:",
+        preprocessResult.processedText.length
+      );
+      console.log("📝 句子数组:", preprocessResult.sentences);
+
+      // 使用合并后的文本进行分析（而不是句子数组）
+      const result = await analyzeText(preprocessResult.processedText);
 
       // 在结果中添加预处理信息
       result.preprocessInfo = {
@@ -131,6 +155,8 @@ const HomePage = () => {
         processedSentenceCount: preprocessResult.sentenceCount,
         isLimited: preprocessResult.isLimited,
         sentences: preprocessResult.sentences,
+        // 新增：去重信息
+        deduplication: preprocessResult.deduplication,
       };
 
       // 保存到历史记录
@@ -166,6 +192,53 @@ const HomePage = () => {
     }
   };
 
+  // 处理分析按钮点击
+  const handleAnalyze = async () => {
+    if (!inputText.trim()) {
+      setError("请输入要分析的英文文本");
+      return;
+    }
+
+    // 先进行文本预处理，检查句子数量（包含去重处理）
+    const preprocessResult = preprocessText(inputText);
+
+    // 显示去重信息（如果有）
+    if (preprocessResult.deduplication.hasDeduplication) {
+      console.log(
+        `🔄 预分析检测到重复句子: ${preprocessResult.deduplication.originalCount} -> ${preprocessResult.deduplication.uniqueCount} 个句子`
+      );
+    }
+
+    // 使用去重后的句子数量判断是否需要截断
+    if (preprocessResult.deduplication.uniqueCount > 10) {
+      setPendingAnalysisText(inputText);
+      setPendingSentenceCount(preprocessResult.deduplication.uniqueCount);
+      setPendingDeduplicationInfo(preprocessResult.deduplication);
+      setShowTruncateConfirm(true);
+      return;
+    }
+
+    // 句子数量在限制内，直接分析
+    await performAnalysis(inputText);
+  };
+
+  // 处理截断确认
+  const handleTruncateConfirm = async () => {
+    setShowTruncateConfirm(false);
+    await performAnalysis(pendingAnalysisText);
+    setPendingAnalysisText("");
+    setPendingSentenceCount(0);
+    setPendingDeduplicationInfo(null);
+  };
+
+  // 处理取消截断
+  const handleTruncateCancel = () => {
+    setShowTruncateConfirm(false);
+    setPendingAnalysisText("");
+    setPendingSentenceCount(0);
+    setPendingDeduplicationInfo(null);
+  };
+
   const handleLoadExample = () => {
     const exampleText = `It was a sunny Saturday morning when we decided to visit the zoo. My classmates and I gathered at the school gate, all excited about our field trip. Our teacher, Mr. Li, checked the attendance and reminded us about the safety rules. At the zoo entrance, we saw beautiful flowers and tall trees creating a welcoming atmosphere. The monkeys in the first enclosure were incredibly playful and entertaining. They were jumping from branch to branch while some were eating bananas. A baby elephant was spraying water with its trunk, delighting all the visitors. The lions were resting majestically under the shade of large oak trees. Colorful parrots in the aviary were singing melodious songs that filled the air. This educational trip taught us valuable lessons about wildlife conservation.`;
 
@@ -195,9 +268,9 @@ const HomePage = () => {
 
       <main className="main-content">
         <div className="hero-section">
-          <h1 className="hero-title">英语文本精讲分析器</h1>
+          <h1 className="hero-title">你的英语学习小伙伴 ✨</h1>
           <p className="hero-subtitle">
-            输入英文文本，获得逐句详细分析：翻译、词汇、语法结构和重点难点
+            贴上任何英文文本，我来陪你一起细细品读～每个句子都有惊喜发现哦！
           </p>
         </div>
 
@@ -221,7 +294,7 @@ const HomePage = () => {
         <button
           className="config-button"
           onClick={() => setShowHistory(true)}
-          title="学习历史"
+          title="查看学习足迹"
         >
           <Clock size={20} />
         </button>
@@ -229,7 +302,7 @@ const HomePage = () => {
         <button
           className="config-button"
           onClick={() => setShowConfig(true)}
-          title="API 配置"
+          title="连接智能助手"
         >
           <Settings size={20} />
         </button>
@@ -257,6 +330,16 @@ const HomePage = () => {
         <HistoryModal
           onClose={() => setShowHistory(false)}
           onSelectHistory={handleSelectFromHistory}
+        />
+      )}
+
+      {showTruncateConfirm && (
+        <TruncateConfirmModal
+          totalSentences={pendingSentenceCount}
+          maxSentences={10}
+          deduplicationInfo={pendingDeduplicationInfo}
+          onConfirm={handleTruncateConfirm}
+          onCancel={handleTruncateCancel}
         />
       )}
 

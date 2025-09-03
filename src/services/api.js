@@ -199,29 +199,6 @@ export const getMockAnalysis = (text) => {
   return {
     originalText: text,
     translation: "在过去，编写软件比手动做事更好。你构建一次软件，然后它就会永远为你工作。",
-    phrases: [
-      {
-        phrase: "in the past",
-        translation: "在过去",
-        usage: "用于表示过去的时间，常用于句首",
-        example: "In the past, people communicated by letters.",
-        type: "时间状语"
-      },
-      {
-        phrase: "better than",
-        translation: "比...更好",
-        usage: "比较级结构，用于对比两个事物",
-        example: "This method is better than the old one.",
-        type: "比较结构"
-      },
-      {
-        phrase: "work for you",
-        translation: "为你工作/效劳",
-        usage: "表示某事物对某人有益或起作用",
-        example: "This strategy will work for you.",
-        type: "动词短语"
-      }
-    ],
     vocabulary: [
       {
         word: "manually",
@@ -247,24 +224,52 @@ export const getMockAnalysis = (text) => {
         title: "比较级结构",
         explanation: "was better than 表示过去的比较，用于对比两种情况",
         example: "Writing software was better than doing things manually",
-        exampleTranslation: "编写软件比手动做事更好"
+        exampleTranslation: "编写软件比手动做事更好。"
       },
       {
         title: "一般现在时",
         explanation: "works for you 使用一般现在时表示持续的状态",
         example: "it works for you forever",
-        exampleTranslation: "它永远为你工作"
+        exampleTranslation: "它永远为你工作。"
       }
     ],
     sentences: [
       {
         original: "In the past, writing software was better than doing things manually.",
         translation: "在过去，编写软件比手动做事更好。",
+        phrases: [
+          {
+            phrase: "in the past",
+            translation: "在过去",
+            usage: "用于表示过去的时间，常用于句首",
+            example: "In the past, people communicated by letters.",
+            exampleTranslation: "在过去，人们通过信件交流。",
+            type: "时间状语"
+          },
+          {
+            phrase: "better than",
+            translation: "比...更好",
+            usage: "比较级结构，用于对比两个事物",
+            example: "This method is better than the old one.",
+            exampleTranslation: "这种方法比旧的方法更好。",
+            type: "比较结构"
+          }
+        ],
         keyPoints: "- **In the past**: 时间状语，表示过去的情况\n- **比较级结构**: was better than 用于比较"
       },
       {
         original: "You build software once and then it works for you forever.",
         translation: "你构建一次软件，然后它就会永远为你工作。",
+        phrases: [
+          {
+            phrase: "work for you",
+            translation: "为你工作/效劳",
+            usage: "表示某事物对某人有益或起作用",
+            example: "This strategy will work for you.",
+            exampleTranslation: "这个策略对你会有用。",
+            type: "动词短语"
+          }
+        ],
         keyPoints: "- **once**: 表示一次性的动作\n- **forever**: 表示永久持续的状态"
       }
     ],

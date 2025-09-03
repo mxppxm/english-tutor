@@ -41,7 +41,7 @@ const VocabularyBookModal = ({ onClose }) => {
 
       setWords(allWords);
     } catch (error) {
-      console.error("加载单词失败:", error);
+      console.error("加载收藏单词失败:", error);
     } finally {
       setLoading(false);
     }
@@ -88,7 +88,7 @@ const VocabularyBookModal = ({ onClose }) => {
       await uncollectWord(wordId);
       setWords((prevWords) => prevWords.filter((word) => word.id !== wordId));
     } catch (error) {
-      alert("移除失败: " + error.message);
+      alert("移除失败啦: " + error.message);
     }
   };
 
@@ -121,8 +121,10 @@ const VocabularyBookModal = ({ onClose }) => {
                 <BookOpen className="header-icon" />
               </div>
               <div className="header-text">
-                <h2 className="header-title">我的单词本</h2>
-                <span className="header-subtitle">收集的学习词汇</span>
+                <h2 className="header-title">我的单词收藏夹 ✨</h2>
+                <span className="header-subtitle">
+                  每个单词都是学习的小成就
+                </span>
               </div>
               <div className="header-stats">
                 <div className="stats-badge">
@@ -147,7 +149,7 @@ const VocabularyBookModal = ({ onClose }) => {
             <Search className="search-icon" />
             <input
               type="text"
-              placeholder="搜索单词..."
+              placeholder="找找看学过哪些单词..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -163,9 +165,9 @@ const VocabularyBookModal = ({ onClose }) => {
           ) : words.length === 0 ? (
             <div className="vocabulary-empty">
               <Heart className="vocabulary-empty-icon" />
-              <p>单词本是空的</p>
+              <p>还没有收藏任何单词呢～</p>
               <p className="text-sm text-gray-500">
-                在学习过程中点击单词旁的"加入单词本"按钮来添加单词
+                在阅读文章时点击单词旁的"收藏"按钮，把喜欢的单词加进来吧
               </p>
             </div>
           ) : (
@@ -187,7 +189,8 @@ const VocabularyBookModal = ({ onClose }) => {
         {totalPages > 1 && (
           <div className="vocabulary-pagination">
             <div className="vocabulary-pagination-info">
-              第 {currentPage} 页，共 {totalPages} 页 (共 {words.length} 个单词)
+              第 {currentPage} 页 / 共 {totalPages} 页 (已收藏 {words.length}{" "}
+              个单词)
             </div>
             <div className="vocabulary-pagination-controls">
               <button
@@ -319,7 +322,7 @@ const VocabularyCard = ({ word, onRemove, onSpeak }) => {
           <button
             className="action-btn remove"
             onClick={onRemove}
-            title="从单词本移除"
+            title="从收藏中移除"
           >
             <Trash2 size={16} />
             移除
