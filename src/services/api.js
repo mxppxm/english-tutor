@@ -199,6 +199,29 @@ export const getMockAnalysis = (text) => {
   return {
     originalText: text,
     translation: "在过去，编写软件比手动做事更好。你构建一次软件，然后它就会永远为你工作。",
+    phrases: [
+      {
+        phrase: "in the past",
+        translation: "在过去",
+        usage: "用于表示过去的时间，常用于句首",
+        example: "In the past, people communicated by letters.",
+        type: "时间状语"
+      },
+      {
+        phrase: "better than",
+        translation: "比...更好",
+        usage: "比较级结构，用于对比两个事物",
+        example: "This method is better than the old one.",
+        type: "比较结构"
+      },
+      {
+        phrase: "work for you",
+        translation: "为你工作/效劳",
+        usage: "表示某事物对某人有益或起作用",
+        example: "This strategy will work for you.",
+        type: "动词短语"
+      }
+    ],
     vocabulary: [
       {
         word: "manually",

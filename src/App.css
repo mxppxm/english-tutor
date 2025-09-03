@@ -348,6 +348,78 @@ body {
   font-style: normal;
 }
 
+/* Phrases Section */
+.phrases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.phrase-card {
+  background: var(--bg-primary);
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  transition: var(--transition);
+  border-left: 4px solid var(--accent-color);
+}
+
+.phrase-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.phrase-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.phrase-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  flex-grow: 1;
+}
+
+.phrase-type {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  background: var(--bg-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
+.phrase-translation {
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.phrase-usage {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.phrase-example {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.usage-label {
+  font-weight: 500;
+  font-style: normal;
+  color: var(--text-primary);
+}
+
 /* Grammar List */
 .grammar-list {
   display: flex;

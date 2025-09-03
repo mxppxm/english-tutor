@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Book,
   Globe,
@@ -7,6 +7,7 @@ import {
   PenTool,
   MessageCircle,
   Lightbulb,
+  Hash,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
@@ -18,6 +19,7 @@ const ResultSection = ({ result }) => {
   const [expandedSections, setExpandedSections] = useState({
     original: true,
     translation: true,
+    phrases: true,
     vocabulary: true,
     grammar: true,
     sentences: true,
@@ -34,6 +36,7 @@ const ResultSection = ({ result }) => {
   const viewOptions = [
     { id: "all", label: "全部" },
     { id: "translation", label: "翻译" },
+    { id: "phrases", label: "短语" },
     { id: "vocabulary", label: "词汇" },
     { id: "grammar", label: "语法" },
   ];
@@ -126,6 +129,70 @@ const ResultSection = ({ result }) => {
               )}
             </motion.div>
           )}
+
+          {/* 重点短语 */}
+          {shouldShowSection("phrases") &&
+            result.phrases &&
+            result.phrases.length > 0 && (
+              <motion.div
+                className="content-block"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+              >
+                <div
+                  className="block-header"
+                  onClick={() => toggleSection("phrases")}
+                >
+                  <h3>
+                    <Hash size={20} />
+                    重点短语
+                  </h3>
+                  {expandedSections.phrases ? (
+                    <ChevronUp size={20} />
+                  ) : (
+                    <ChevronDown size={20} />
+                  )}
+                </div>
+                {expandedSections.phrases && (
+                  <div className="block-content">
+                    <div className="phrases-grid">
+                      {result.phrases.map((phrase, index) => (
+                        <motion.div
+                          key={index}
+                          className="phrase-card"
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: index * 0.05 }}
+                        >
+                          <div className="phrase-header">
+                            <span className="phrase-text">{phrase.phrase}</span>
+                            {phrase.type && (
+                              <span className="phrase-type">{phrase.type}</span>
+                            )}
+                          </div>
+                          <div className="phrase-translation">
+                            {phrase.translation}
+                          </div>
+                          {phrase.usage && (
+                            <div className="phrase-usage">
+                              <span className="usage-label">用法:</span>{" "}
+                              {phrase.usage}
+                            </div>
+                          )}
+                          {phrase.example && (
+                            <div className="phrase-example">
+                              <span className="example-label">例句:</span>{" "}
+                              {phrase.example}
+                            </div>
+                          )}
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
 
           {/* 重点词汇 */}
           {shouldShowSection("vocabulary") &&
