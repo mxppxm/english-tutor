@@ -16,6 +16,7 @@ const LearningPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showVocabularyBook, setShowVocabularyBook] = useState(false);
+  // 移除滚动隐藏行为，保持固定头部
 
   useEffect(() => {
     const loadData = async () => {
@@ -51,6 +52,8 @@ const LearningPage = () => {
     loadData();
   }, [historyId, location.state]);
 
+  // 无滚动联动逻辑
+
   const handleBack = () => {
     navigate("/");
   };
@@ -83,26 +86,23 @@ const LearningPage = () => {
 
   return (
     <div className="app learning-page">
-      <Header />
+      <Header showTagline={false} />
 
-      <div className="learning-header">
-        <button onClick={handleBack} className="back-button">
-          <ArrowLeft size={20} />
-          回到首页
-        </button>
-
-        <div className="learning-title">
-          <h1>{analysisResult?.title || "让我们一起学习这篇文章 📖"}</h1>
+      <div className={`learning-header mobile-two-rows`}>
+        <div className="learning-actions-row">
+          <button onClick={handleBack} className="back-button">
+            <ArrowLeft size={20} />
+            回到首页
+          </button>
+          <button
+            onClick={() => setShowVocabularyBook(true)}
+            className="vocabulary-book-button"
+            title="我的单词收藏"
+          >
+            <BookOpen size={20} />
+            单词收藏
+          </button>
         </div>
-
-        <button
-          onClick={() => setShowVocabularyBook(true)}
-          className="vocabulary-book-button"
-          title="我的单词收藏"
-        >
-          <BookOpen size={20} />
-          单词收藏
-        </button>
       </div>
 
       <main className="learning-content">

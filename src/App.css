@@ -2072,6 +2072,39 @@ body {
 @media (max-width: 768px) {
   .header-content {
     padding: 0 1rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center !important;
+  }
+
+  /* 移动端：Header 随页面滚动，不固定 */
+  .header {
+    position: static;
+    top: auto;
+    box-shadow: none;
+  }
+
+  .header .logo {
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .header .logo h1 {
+    font-size: 1.5rem;
+    white-space: nowrap;
+  }
+
+  .header .tagline {
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  /* 移动端：模态框关闭按钮固定在右上角，避免与标题同一行时换行错位 */
+  .modal-header .close-button {
+    position: absolute;
+    right: 0.75rem;
+    top: 0.75rem;
   }
 
   .main-content {
@@ -2087,6 +2120,33 @@ body {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+  }
+
+  .section-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .action-buttons {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .input-footer {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .word-count {
+    text-align: center;
+    font-size: 0.875rem;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+    justify-content: center;
   }
 
   .view-options {
@@ -2125,10 +2185,6 @@ body {
     font-size: 0.95rem;
   }
 }
-
-/* Tailwind CSS Integration */
-@import "tailwindcss/preflight";
-@import "tailwindcss/utilities";
 
 /* History Modal Styles */
 .history-modal {
@@ -2173,6 +2229,12 @@ body {
   .history-modal .modal-header {
     padding: 1.25rem 1.5rem;
   }
+  /* 移动端历史记录弹窗关闭按钮固定位置 */
+  .history-modal .modal-header .header-buttons {
+    position: absolute;
+    right: 0.75rem;
+    top: 0.75rem;
+  }
 }
 
 .history-modal .modal-header h2 {
@@ -2184,8 +2246,13 @@ body {
 
 @media (max-width: 768px) {
   .history-modal .modal-header h2 {
-    font-size: 1.25rem;
-    gap: 0.5rem;
+    font-size: 1.1rem;
+    gap: 0.375rem;
+  }
+
+  .history-modal .modal-header h2 .w-6 {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
   }
 }
 
@@ -3890,6 +3957,15 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+/* 下滑隐藏，上滑显示 */
+/* 之前的隐藏样式保留但不再使用 */
+.learning-header.is-hidden {
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .back-button {
@@ -3933,10 +4009,10 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: var(--primary-color);
-  color: white;
-  border: none;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: var(--transition);
@@ -3944,7 +4020,7 @@ body {
 }
 
 .vocabulary-book-button:hover {
-  background: var(--primary-hover);
+  background: rgba(102, 126, 234, 0.08);
 }
 
 .learning-content {
@@ -4374,6 +4450,21 @@ body {
 
   .header-title {
     font-size: 1.25rem;
+  }
+  /* 移动端首页 Header（简版）优化 */
+  .logo {
+    gap: 0.5rem;
+  }
+  .logo h1 {
+    white-space: nowrap;
+  }
+  .logo svg {
+    width: 28px;
+    height: 28px;
+  }
+  .tagline {
+    line-height: 1.4;
+    margin-top: 0.125rem;
   }
 
   .stats-badge {
@@ -5538,8 +5629,49 @@ body {
 
   .learning-header {
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.5rem;
     text-align: center;
+    padding: 0.75rem 1rem;
+  }
+
+  /* 移动端：学习页头部两行布局（第一行：返回与收藏；第二行：标题） */
+  .learning-header.mobile-two-rows {
+    align-items: stretch;
+  }
+  .learning-header.mobile-two-rows .learning-title {
+    order: 2;
+    width: 100%;
+  }
+  .learning-header.mobile-two-rows .learning-actions-row {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* 移动端：回到首页按钮更轻量 */
+  .back-button {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+  .back-button:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+  .vocabulary-book-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  /* 修复：展开/收起模块标题与符号同一行 */
+  .content-section .section-header,
+  .section-header.clickable {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
   }
 
   .learning-title h1 {
@@ -5567,6 +5699,22 @@ body {
 
   .word-tooltip {
     max-width: 250px;
+  }
+
+  /* tooltip：按钮行在小屏不换行，文案保持完整 */
+  .tooltip-actions {
+    flex-wrap: nowrap;
+  }
+  .tooltip-actions .action-btn {
+    white-space: nowrap;
+  }
+
+  /* 移动端：tooltip 操作按钮与文案不换行，保持单行紧凑布局 */
+  .tooltip-actions {
+    flex-wrap: nowrap;
+  }
+  .tooltip-actions .action-btn {
+    white-space: nowrap;
   }
 
   .flat-learning-view {
@@ -5634,12 +5782,21 @@ body {
     gap: 0.75rem;
   }
 
-  .control-switch {
+  .expand-all-button {
+    width: 100%;
     justify-content: center;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
   }
 
   .vocabulary-learning-button {
     width: 100%;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .control-switch {
     justify-content: center;
   }
 
@@ -6051,6 +6208,47 @@ body {
     gap: 0.5rem;
   }
 
+  .sentence-header.clickable {
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    margin-bottom: 0.75rem;
+  }
+
+  .sentence-header-content {
+    width: 100%;
+  }
+
+  .sentence-header-actions {
+    width: 100%;
+    justify-content: space-between;
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+
+  .sentence-header-actions .toggle-icon {
+    font-size: 1.25rem;
+  }
+
+  .paragraph-header {
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    margin-bottom: 0.75rem;
+    align-items: center; /* 与 +- 按钮垂直居中 */
+    gap: 0.5rem;
+  }
+
+  .expand-btn {
+    padding: 0.5rem;
+    flex-shrink: 0; /* 防止换行 */
+  }
+
+  .paragraph-header h3,
+  .paragraph-number {
+    white-space: nowrap; /* 标题不换行 */
+  }
+
   .summary-section {
     padding: 1.5rem;
   }
@@ -6298,7 +6496,16 @@ body {
   }
 
   .modal-header {
-    padding: 1.25rem 1.25rem 0 1.25rem;
+    padding: 1rem 1.25rem 0 1.25rem;
+  }
+
+  .modal-header h2 {
+    font-size: 1.1rem !important;
+  }
+
+  .modal-header .w-6 {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
   }
 
   .modal-body {
@@ -6647,6 +6854,46 @@ body {
   background: var(--bg-tertiary);
   border-color: var(--primary-color);
   color: var(--primary-color);
+}
+
+/* Processing State */
+.processing-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--primary-color);
+  text-align: center;
+  min-height: 200px;
+}
+
+.processing-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.processing-icon {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.processing-container h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.processing-container p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.4;
 }
 
 /* Spinning Animation */

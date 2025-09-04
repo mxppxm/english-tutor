@@ -1,24 +1,10 @@
 import { useState, useRef } from "react";
-import {
-  Upload,
-  Image as ImageIcon,
-  X,
-  Eye,
-  CheckCircle,
-  AlertCircle,
-  Loader2,
-} from "lucide-react";
-import {
-  validateImageFile,
-  preprocessImageForOCR,
-  createPreviewImage,
-} from "../utils/imageUtils";
+import { Upload, X, AlertCircle, Loader2 } from "lucide-react";
+import { validateImageFile, preprocessImageForOCR } from "../utils/imageUtils";
 import { recognizeImageText } from "../services/api";
 
 const ImageUpload = ({ onTextExtracted, isDisabled = false }) => {
-  const [uploadState, setUploadState] = useState("idle"); // idle, uploaded, processing, error
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [processedPreview, setProcessedPreview] = useState(null);
+  const [uploadState, setUploadState] = useState("idle"); // idle, processing, error
   const [error, setError] = useState("");
   // 固定的处理选项，优化OCR识别效果
   const processingOptions = {
@@ -34,15 +20,13 @@ const ImageUpload = ({ onTextExtracted, isDisabled = false }) => {
   // 重置状态
   const resetState = () => {
     setUploadState("idle");
-    setSelectedFile(null);
-    setProcessedPreview(null);
     setError("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
-  // 处理文件选择
+  // 处理文件选择 - 直接进行OCR识别
   const handleFileSelect = async (file) => {
     setError("");
 
@@ -53,32 +37,46 @@ const ImageUpload = ({ onTextExtracted, isDisabled = false }) => {
       return;
     }
 
-    setSelectedFile(file);
-    setUploadState("uploaded");
+    setUploadState("processing");
 
-    // 立即进行预处理
     try {
-      console.log("🔄 开始图片预处理...");
+      console.log("🖼️ AI 小助手开始识别图片啦...");
+
+      // 预处理图片
       const preprocessResult = await preprocessImageForOCR(
         file,
         processingOptions
       );
 
-      if (preprocessResult.success) {
-        // 创建处理后的预览
-        const { previewDataUrl } = await createPreviewImage(
-          preprocessResult.processedImage,
-          400
-        );
-        setProcessedPreview(previewDataUrl);
+      if (!preprocessResult.success) {
+        throw new Error(preprocessResult.error);
+      }
 
-        console.log("✅ 图片预处理完成");
-        console.log("📊 处理信息:", preprocessResult.metadata);
+      console.log("✅ 图片处理完成啦");
+      console.log("📊 处理信息:", preprocessResult.metadata);
+
+      // 直接调用OCR API
+      const ocrResult = await recognizeImageText(
+        preprocessResult.processedImage
+      );
+
+      if (ocrResult.success && ocrResult.extractedText) {
+        // 格式化识别的文本
+        const formattedText = formatOCRText(ocrResult.extractedText);
+        console.log("✅ AI识别完成啦，发现文字了");
+        console.log("📄 原始识别文本:", ocrResult.extractedText);
+        console.log("📝 格式化后文本:", formattedText);
+
+        // 直接传递格式化后的文本到输入框
+        onTextExtracted(formattedText);
+        resetState(); // 重置组件状态，准备下次使用
       } else {
-        setError(preprocessResult.error);
+        throw new Error("咦，没有发现文字呢～ 请确保图片中有清晰的英文文字哦");
       }
     } catch (err) {
-      setError(`预处理失败: ${err.message}`);
+      console.error("🚨 咦，识别遇到了小问题:", err);
+      setError(err.message || "识别遇到了小问题，让我们重试一下吧");
+      setUploadState("error");
     }
   };
 
@@ -117,51 +115,6 @@ const ImageUpload = ({ onTextExtracted, isDisabled = false }) => {
     const file = e.target.files[0];
     if (file) {
       handleFileSelect(file);
-    }
-  };
-
-  // 开始OCR识别
-  const handleStartOCR = async () => {
-    if (!selectedFile) return;
-
-    setUploadState("processing");
-    setError("");
-
-    try {
-      console.log("🖼️ 开始OCR识别...");
-
-      // 重新预处理（使用当前设置）
-      const preprocessResult = await preprocessImageForOCR(
-        selectedFile,
-        processingOptions
-      );
-
-      if (!preprocessResult.success) {
-        throw new Error(preprocessResult.error);
-      }
-
-      // 调用OCR API
-      const ocrResult = await recognizeImageText(
-        preprocessResult.processedImage
-      );
-
-      if (ocrResult.success && ocrResult.extractedText) {
-        // 格式化识别的文本
-        const formattedText = formatOCRText(ocrResult.extractedText);
-        console.log("✅ OCR识别完成");
-        console.log("📄 原始识别文本:", ocrResult.extractedText);
-        console.log("📝 格式化后文本:", formattedText);
-
-        // 直接传递格式化后的文本到输入框
-        onTextExtracted(formattedText);
-        resetState(); // 重置组件状态，准备下次使用
-      } else {
-        throw new Error("未能识别出文本内容，请确保图片中包含清晰的英文文字");
-      }
-    } catch (err) {
-      console.error("🚨 OCR识别失败:", err);
-      setError(err.message || "OCR识别失败");
-      setUploadState("error");
     }
   };
 
@@ -222,47 +175,15 @@ const ImageUpload = ({ onTextExtracted, isDisabled = false }) => {
     </div>
   );
 
-  // 渲染图片预览
-  const renderImagePreview = () => (
-    <div className="image-preview-container">
-      <div className="preview-header">
-        <h4>
-          <ImageIcon size={16} />
-          图片预览
-        </h4>
-        <button className="btn btn-icon" onClick={resetState} title="重新选择">
-          <X size={16} />
-        </button>
-      </div>
-
-      <div className="preview-images">
-        {/* 简化预览 - 只显示处理后的图片 */}
-        {processedPreview && (
-          <div className="preview-item single-preview">
-            <img src={processedPreview} alt="预览图片" />
-            <p>已优化，准备识别</p>
-          </div>
-        )}
-      </div>
-
-      {/* 操作按钮 */}
-      <div className="preview-actions">
-        <button
-          className="btn btn-primary"
-          onClick={handleStartOCR}
-          disabled={uploadState === "processing"}
-        >
-          {uploadState === "processing" ? (
-            <>
-              <Loader2 size={16} className="spinning" />
-              识别中...
-            </>
-          ) : (
-            <>
-              <Eye size={16} />
-              开始识别文字
-            </>
-          )}
+  // 渲染处理中状态
+  const renderProcessing = () => (
+    <div className="processing-container">
+      <div className="processing-content">
+        <Loader2 size={48} className="spinning processing-icon" />
+        <h3>正在用心识别图片文字呢～</h3>
+        <p>AI 小助手正在认真读取你的图片，稍等一下下哦 ✨</p>
+        <button className="btn btn-secondary" onClick={resetState}>
+          取消
         </button>
       </div>
     </div>
@@ -281,10 +202,9 @@ const ImageUpload = ({ onTextExtracted, isDisabled = false }) => {
 
   return (
     <div className="image-upload-component">
-      {error && uploadState === "error" && renderError()}
+      {uploadState === "error" && renderError()}
       {uploadState === "idle" && renderUploadZone()}
-      {(uploadState === "uploaded" || uploadState === "processing") &&
-        renderImagePreview()}
+      {uploadState === "processing" && renderProcessing()}
 
       {/* 通用错误提示 */}
       {error && uploadState !== "error" && (

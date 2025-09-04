@@ -232,11 +232,12 @@ const SentenceLearningView = ({ result }) => {
                 当前词库: {result.vocabulary.vocabularyName}
               </span>
             )}
-            {result.vocabulary?.foundWords && (
-              <span className="stat-item">
-                词库单词: {result.vocabulary.foundWords.length} 个
-              </span>
-            )}
+            {result.vocabulary?.foundWords &&
+              result.vocabulary.foundWords.length > 0 && (
+                <span className="stat-item">
+                  词库单词: {result.vocabulary.foundWords.length} 个
+                </span>
+              )}
           </div>
         </div>
 
@@ -263,16 +264,17 @@ const SentenceLearningView = ({ result }) => {
             </label>
           </div>
 
-          {result.vocabulary?.foundWords && (
-            <button
-              onClick={() => setShowVocabularyLearning(true)}
-              className="vocabulary-learning-button"
-              title="重点单词学习"
-            >
-              <BookOpen size={18} />
-              重点单词学习
-            </button>
-          )}
+          {result.vocabulary?.foundWords &&
+            result.vocabulary.foundWords.length > 0 && (
+              <button
+                onClick={() => setShowVocabularyLearning(true)}
+                className="vocabulary-learning-button"
+                title="重点单词学习"
+              >
+                <BookOpen size={18} />
+                重点单词学习
+              </button>
+            )}
         </div>
       </div>
 

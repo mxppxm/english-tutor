@@ -46,9 +46,11 @@ const apiRequest = async (endpoint, options = {}) => {
 // 批量句子分析（每批最多5句，分批请求，自动合并结果）
 export const analyzeSentencesBatch = async (sentences, batchSize = 5) => {
   const allResults = [];
+
   for (let i = 0; i < sentences.length; i += batchSize) {
     const batch = sentences.slice(i, i + batchSize);
     const batchResult = await analyzeSentences(batch);
+
     if (batchResult?.sentences && Array.isArray(batchResult.sentences)) {
       allResults.push(...batchResult.sentences);
     } else {
@@ -56,11 +58,48 @@ export const analyzeSentencesBatch = async (sentences, batchSize = 5) => {
       allResults.push(batchResult);
     }
   }
-  // 合并后按原有格式返回，方便前端使用
-  return { sentences: allResults };
+
+  // 对所有句子的文本进行统一的词库分析
+  let vocabularyAnalysis = null;
+  try {
+    const selectedVocabId = getSelectedVocabulary();
+
+    if (selectedVocabId && VOCABULARY_LISTS[selectedVocabId]) {
+      // 加载词库数据
+      const vocabularyData = await loadVocabulary(selectedVocabId);
+
+      // 将所有句子的文本合并进行词库分析
+      const allText = sentences.join(' ');
+      const foundWords = findVocabularyInText(allText, vocabularyData);
+
+      vocabularyAnalysis = {
+        vocabularyId: selectedVocabId,
+        vocabularyName: VOCABULARY_LISTS[selectedVocabId].name,
+        totalWords: vocabularyData.length,
+        foundWords: foundWords,
+        foundCount: foundWords.length,
+        coverage: vocabularyData.length > 0 ? Math.round((foundWords.length / vocabularyData.length) * 100) : 0
+      };
+    }
+  } catch (vocabError) {
+    console.warn('批量词库分析失败:', vocabError);
+    // 词库分析失败不影响主要功能，只记录警告
+  }
+
+  // 合并后按原有格式返回，包含完整的词库信息
+  const result = {
+    sentences: allResults,
+    analysisMode: "sentence" // 标记为句子分析模式
+  };
+
+  if (vocabularyAnalysis) {
+    result.vocabulary = vocabularyAnalysis;
+  }
+
+  return result;
 }
 
-// 逐句分析函数 - 新的句子级分析接口
+// 逐句分析函数 - 新的句子级分析接口（不包含词库分析，词库分析由批量函数统一处理）
 export const analyzeSentences = async (sentences) => {
   try {
     // 获取用户配置
@@ -86,49 +125,7 @@ export const analyzeSentences = async (sentences) => {
     })
 
     console.log('逐句分析完成')
-
-    // 集成词库匹配功能
-    let vocabularyAnalysis = null
-    try {
-      const selectedVocabId = getSelectedVocabulary()
-      console.log('开始词库分析，选中词库:', selectedVocabId)
-
-      if (selectedVocabId && VOCABULARY_LISTS[selectedVocabId]) {
-        // 加载词库数据
-        const vocabularyData = await loadVocabulary(selectedVocabId)
-        console.log(`词库 ${selectedVocabId} 加载完成，共 ${vocabularyData.length} 个单词`)
-
-        // 在所有句子中查找词库单词
-        const allText = sentences.join(' ')
-        const foundWords = findVocabularyInText(allText, vocabularyData)
-        console.log(`在文章中找到 ${foundWords.length} 个词库单词`)
-
-        vocabularyAnalysis = {
-          vocabularyId: selectedVocabId,
-          vocabularyName: VOCABULARY_LISTS[selectedVocabId].name,
-          totalWords: vocabularyData.length,
-          foundWords: foundWords,
-          foundCount: foundWords.length,
-          coverage: vocabularyData.length > 0 ? Math.round((foundWords.length / vocabularyData.length) * 100) : 0
-        }
-
-        console.log('词库分析完成:', vocabularyAnalysis)
-      } else {
-        console.log('未选择词库或词库不存在')
-      }
-    } catch (vocabError) {
-      console.warn('词库分析失败:', vocabError)
-      // 词库分析失败不影响主要功能，只记录警告
-    }
-
-    // 合并结果
-    const analysisResult = {
-      ...result,
-      vocabulary: vocabularyAnalysis
-    }
-
-    console.log('最终分析结果包含词库信息:', !!analysisResult.vocabulary)
-    return analysisResult
+    return result
 
   } catch (error) {
     console.error('分析失败:', error)
@@ -226,8 +223,8 @@ export const recognizeImageText = async (imageData) => {
     console.log('🖼️ 开始图片文字识别，使用提供商:', provider)
 
     // 调用独立的OCR API
-     const result = await apiRequest('/image-ocr', {
-         method: 'POST',
+    const result = await apiRequest('/image-ocr', {
+      method: 'POST',
       body: JSON.stringify({
         image: imageData,
         provider,
