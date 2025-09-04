@@ -86,7 +86,7 @@ const LearningPage = () => {
 
   return (
     <div className="app learning-page">
-      <Header showTagline={false} />
+      <Header />
 
       <div className={`learning-header mobile-two-rows`}>
         <div className="learning-actions-row">
