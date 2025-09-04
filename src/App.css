@@ -6371,7 +6371,7 @@ body {
 }
 
 /* 截断确认弹窗样式 - 传统清晰样式 */
-.modal-overlay {
+.truncate-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -6385,7 +6385,7 @@ body {
   backdrop-filter: blur(4px);
 }
 
-.modal-content {
+.truncate-modal-content {
   background: white;
   border-radius: 12px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -6396,7 +6396,7 @@ body {
   border: 1px solid #e5e7eb;
 }
 
-.modal-header {
+.truncate-modal-header {
   padding: 1.5rem 1.5rem 0 1.5rem;
   display: flex;
   flex-direction: column;
@@ -6408,14 +6408,14 @@ body {
   border-radius: 12px 12px 0 0;
 }
 
-.modal-header h2 {
+.truncate-modal-header h2 {
   font-size: 1.25rem;
   font-weight: 600;
   color: #111827;
   margin: 0.5rem 0 1rem 0;
 }
 
-.close-button {
+.truncate-modal-content .close-button {
   position: absolute;
   top: 1rem;
   right: 1rem;
@@ -6428,12 +6428,12 @@ body {
   transition: all 0.2s ease;
 }
 
-.close-button:hover {
+.truncate-modal-content .close-button:hover {
   background: #e5e7eb;
   color: #374151;
 }
 
-.modal-icon {
+.truncate-modal-content .modal-icon {
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -6443,13 +6443,13 @@ body {
   margin-bottom: 0.5rem;
 }
 
-.modal-icon.warning {
+.truncate-modal-content .modal-icon.warning {
   background: #fbbf24;
   color: white;
   box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
 }
 
-.modal-body {
+.truncate-modal-content .modal-body {
   padding: 1.5rem;
   background: white;
 }
@@ -6543,7 +6543,7 @@ body {
   font-weight: 700;
 }
 
-.modal-actions {
+.truncate-modal-content .modal-actions {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
@@ -6600,35 +6600,35 @@ body {
     margin: 1rem;
   }
 
-  .modal-actions {
+  .truncate-modal-content .modal-actions {
     flex-direction: column;
     gap: 0.75rem;
   }
 
-  .secondary-button,
-  .primary-button {
+  .truncate-modal-content .secondary-button,
+  .truncate-modal-content .primary-button {
     width: 100%;
     justify-content: center;
   }
 
-  .modal-header {
+  .truncate-modal-header {
     padding: 1rem 1.25rem 0 1.25rem;
   }
 
-  .modal-header h2 {
+  .truncate-modal-header h2 {
     font-size: 1.1rem !important;
   }
 
-  .modal-header .w-6 {
+  .truncate-modal-header .w-6 {
     width: 1.25rem !important;
     height: 1.25rem !important;
   }
 
-  .modal-body {
+  .truncate-modal-content .modal-body {
     padding: 1.25rem;
   }
 
-  .modal-actions {
+  .truncate-modal-content .modal-actions {
     padding: 0 1.25rem 1.25rem 1.25rem;
   }
 }

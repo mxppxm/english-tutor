@@ -9,9 +9,9 @@ const TruncateConfirmModal = ({
   deduplicationInfo = null,
 }) => {
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className="truncate-modal-overlay">
+      <div className="truncate-modal-content">
+        <div className="truncate-modal-header">
           <div className="modal-icon warning">
             <AlertTriangle size={24} />
           </div>

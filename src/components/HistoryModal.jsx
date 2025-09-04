@@ -142,7 +142,7 @@ const HistoryModal = ({ onClose, onSelectHistory }) => {
         style={{ height: "80vh", maxHeight: "600px" }}
       >
         {/* 头部 */}
-        <div className="modal-header fixed-header">
+        <div className="modal-header fixed-header flex">
           <div className="flex items-center gap-3">
             <Clock className="w-6 h-6 text-blue-600" />
             <h2>我们一起学过的文章 📖</h2>
